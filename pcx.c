@@ -4,8 +4,12 @@
 // etc.
 
 #include <stdio.h>
+#include <string.h>
 #include "timer.h"
 #include "vga.h"
+
+extern void err(char* errmsg);
+extern void dec_to_asciiz(int num, char* buf);
 
 char manufacturer;                     // pcx header
 char version;
@@ -28,7 +32,7 @@ unsigned char c, run, ss=0;
 unsigned int vidoffset, n=0;
 FILE *pcxf;
 
-ReadPCXLine(unsigned char *dest)
+void ReadPCXLine(unsigned char *dest)
 { int j;
   n=0;
 
@@ -45,7 +49,7 @@ ReadPCXLine(unsigned char *dest)
   } while (n<bytes);
 }
 
-LoadPCXHeader(char *fname)
+void LoadPCXHeader(char *fname)
 {
   if (!(pcxf=fopen(fname,"rb"))) err("Could not open specified PCX file.");
   fread(&manufacturer,1,1,pcxf);
@@ -75,7 +79,7 @@ LoadPCXHeader(char *fname)
     pal[i]=pal[i] >> 2;
 }
 
-LoadPCXHeaderNP(char *fname)
+void LoadPCXHeaderNP(char *fname)
 {
   if (!(pcxf=fopen(fname,"rb"))) err("Could not open specified PCX file.");
   fread(&manufacturer,1,1,pcxf);
@@ -100,19 +104,19 @@ LoadPCXHeaderNP(char *fname)
 }
 
 
-loadpcx(char *fname, char *dest)
+void loadpcx(char *fname, char *dest)
 {
 
   LoadPCXHeader(fname);
 
   for (i=0; i<depth; i++)
     { vidoffset=5648+(i*352);
-      ReadPCXLine(dest); }
+      ReadPCXLine((unsigned char*)dest); }
 
   fclose(pcxf);
 }
 
-WritePCXLine(unsigned char *p)
+void WritePCXLine(unsigned char *p)
 { int i;
   unsigned char byte,samect,repcode;
 
@@ -134,7 +138,7 @@ WritePCXLine(unsigned char *p)
   } while (i<320);
 }
 
-WritePalette()
+void WritePalette()
 { char b;
   int i;
 
@@ -148,22 +152,22 @@ WritePalette()
       pal[i]=pal[i] >> 2;
 }
 
-ScreenShot()
+void ScreenShot()
 { unsigned char b1;
   unsigned short int w1;
   char fnamestr[13];
 
   // Takes a snapshot of the current screen.
 
-   dec_to_asciiz(ss,&fnamestr);
-   b1=strlen(&fnamestr);
+   dec_to_asciiz(ss, fnamestr);
+   b1=strlen(fnamestr);
    fnamestr[b1++]='.';
    fnamestr[b1++]='P';
    fnamestr[b1++]='C';
    fnamestr[b1++]='X';
    fnamestr[b1++]=0;
 
-   pcxf=fopen(&fnamestr,"wb");
+   pcxf=fopen(fnamestr,"wb");
    ss++;
 
 // Write PCX header

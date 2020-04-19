@@ -3,8 +3,13 @@
 // Copyright (C)1997 BJ Eirich
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "engine.h"
-extern err(char *ermsg);
+#include "vc.h"
+
+extern void err(char *ermsg);
+extern int ObstructionAt(int tx, int ty);
+extern int random(int min, int max);
 
 // ============================ Data ============================
 
@@ -41,7 +46,7 @@ int AnyEntityAt(int ex,int ey)
   return 0;
 }
 
-MoveRight(int i)
+void MoveRight(int i)
 { int tx,ty;
 
   tx=party[i].cx+1; ty=party[i].cy;
@@ -51,7 +56,7 @@ MoveRight(int i)
   party[i].cx++; movesuccess=1;
 }
 
-MoveLeft(int i)
+void MoveLeft(int i)
 { int tx, ty;
 
   tx=party[i].cx-1; ty=party[i].cy;
@@ -61,7 +66,7 @@ MoveLeft(int i)
   party[i].cx--; movesuccess=1;
 }
 
-MoveUp(int i)
+void MoveUp(int i)
 { int tx, ty;
 
   tx=party[i].cx; ty=party[i].cy-1;
@@ -71,7 +76,7 @@ MoveUp(int i)
   party[i].cy--; movesuccess=1;
 }
 
-MoveDown(int i)
+void MoveDown(int i)
 { int tx, ty;
 
   tx=party[i].cx; ty=party[i].cy+1;
@@ -86,7 +91,8 @@ int Zone(int cx, int cy)
   return mapp[((cy*xsize)+cx)] >> 1;
 }
 
-ProcessSpeedAdjEntity(int i)
+void ProcessEntity(int i);
+void ProcessSpeedAdjEntity(int i)
 {
   if (party[i].speed<4)
   {
@@ -107,7 +113,7 @@ ProcessSpeedAdjEntity(int i)
   }
 }
 
-Wander1(int i)
+void Wander1(int i)
 {
   if (!party[i].data1)
   {
@@ -135,7 +141,7 @@ Wander1(int i)
   }
 }
 
-Wander2(int i)
+void Wander2(int i)
 {
   if (!party[i].data1)
   {
@@ -163,7 +169,7 @@ Wander2(int i)
   }
 }
 
-Wander3(int i)
+void Wander3(int i)
 {
   if (!party[i].data1)
   {
@@ -191,13 +197,13 @@ Wander3(int i)
   }
 }
 
-Whitespace(int i)
+void Whitespace(int i)
 {
   while (*party[i].scriptofs==' ')
     party[i].scriptofs++;
 }
 
-GetArg(int i)
+void GetArg(int i)
 { int j;
   char token[10];
 
@@ -210,10 +216,10 @@ GetArg(int i)
     j++;
   }
   token[j]=0;
-  party[i].cmdarg=atoi(&token);
+  party[i].cmdarg=atoi(token);
 }
 
-GetNextCommand(int i)
+void GetNextCommand(int i)
 { unsigned char s;
 
   Whitespace(i);
@@ -239,9 +245,9 @@ GetNextCommand(int i)
   }
 }
 
-MoveScript(int i)
+void MoveScript(int i)
 {
-  if (!party[i].scriptofs) party[i].scriptofs=msbuf+msofstbl[party[i].movescript];
+  if (!party[i].scriptofs) party[i].scriptofs=(unsigned char*)msbuf+msofstbl[party[i].movescript];
   if (!party[i].curcmd) GetNextCommand(i);
 
   switch(party[i].curcmd)
@@ -254,7 +260,7 @@ MoveScript(int i)
     case 6: party[i].cmdarg--; break;
     case 7: return;
     case 8: ExecuteScript(party[i].cmdarg); party[i].cmdarg=0; break;
-    case 9: party[i].scriptofs=msbuf+msofstbl[party[i].movescript];
+    case 9: party[i].scriptofs=(unsigned char*)msbuf+msofstbl[party[i].movescript];
             party[i].cmdarg=0; break;
     case 10: if (party[i].cx<party[i].cmdarg) MoveRight(i);
              if (party[i].cx>party[i].cmdarg) MoveLeft(i);
@@ -272,7 +278,7 @@ MoveScript(int i)
   if (!party[i].cmdarg) party[i].curcmd=0;
 }
 
-TestActive(int i)
+void TestActive(int i)
 { int dx, dy;
 
   dx=abs(party[i].x-party[0].x);
@@ -286,7 +292,7 @@ TestActive(int i)
   else party[i].adjactv=0;
 }
 
-Chase(int i)
+void Chase(int i)
 { int dx, dy, d;
 
   dx=party[0].cx-party[i].cx;
@@ -300,7 +306,7 @@ Chase(int i)
   if (!d && dy>0) MoveDown(i);
 }
 
-CheckChasing(int i)
+void CheckChasing(int i)
 {
   if (abs(party[0].cx-party[i].cx) <= party[i].chasedist &&
       abs(party[0].cy-party[i].cy) <= party[i].chasedist)
@@ -308,7 +314,7 @@ CheckChasing(int i)
        party[i].speed=party[i].chasespeed; }
 }
 
-ProcessEntity(int i)
+void ProcessEntity(int i)
 {
   party[i].speedct=0;
   if (party[i].activmode) TestActive(i);

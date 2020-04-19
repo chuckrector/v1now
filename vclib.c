@@ -1,3 +1,11 @@
+#include "engine.h"
+#include "vga.h"
+#include "battle.h"
+#include "entity.h"
+
+extern void err(char* ermgsg);
+extern void StartupMenu();
+extern void StartNewGame(char* starp);
 // vclib.c
 // The VergeC standard function library
 // Copyright (C)1997 BJ Eirich
@@ -77,13 +85,14 @@
 #include "render.h"
 #include "timer.h"
 #include "vga.h"
-#include "mikmod.h"
+// #include "mikmod.h"
 #include "ricvc.c"
+#include "menu2.h"
+#include "vclib.h"
 
-extern char *strbuf,killvc,*code,*menuptr,*mapvc,menuactive,drawparty,layer1trans,layervctrans,layervc2trans;
+extern char *strbuf,killvc,*code,*mapvc,menuactive,drawparty,layer1trans,layervctrans,layervc2trans;
 extern char cameratracking,*vcdatabuf,movesuccess,*msbuf,drawentities;
 extern unsigned int scriptofstbl[1024];
-extern int varl[10],tvar[26],msofstbl[100];
 extern unsigned char mp_volume;
 
 char fade=1,cancelfade=0,stringbuffer[100],keepaz=0;
@@ -92,7 +101,7 @@ unsigned char storeinv[12];
 #include "nichgvc.c"
 #include "xbigdvc.c"
 
-MapSwitch()
+void MapSwitch()
 { char b;
 
   hookretrace=0;
@@ -114,7 +123,7 @@ MapSwitch()
   timer_count=0;
 }
 
-Warp()
+void Warp()
 { unsigned short int wx,wy;
   int i; char b;
 
@@ -141,7 +150,7 @@ Warp()
   timer_count=0;
 }
 
-AddCharacter()
+void AddCharacter()
 { char c;
 
   if (numchars==5)
@@ -152,14 +161,14 @@ AddCharacter()
   timer_count=0;
 }
 
-SoundEffect()
+void SoundEffect()
 { char c;
 
   c=ResolveOperand();
   playeffect(c-1);
 }
 
-GiveItem ()
+void GiveItem ()
 { short int c,d;
   char *img,first=1;
   int i,j;
@@ -169,13 +178,13 @@ GiveItem ()
 drawloop:
   drawmap();
   tmenubox(50,90,302,132);
-  i=strlen(items[c].name);
+  i=strlen((const char*)items[c].name);
   j=176-(((i*8)+80)/2);
   gotoxy(j,100);
-  printstring(items[c].name);
+  printstring((char*)items[c].name);
   printstring(" Procured!");
   d=items[c].icon;
-  img=itemicons+(256*d);
+  img=(char*)itemicons+(256*d);
   tcopysprite(168,110,16,16,img);
   vgadump();
   readcontrols();
@@ -193,7 +202,7 @@ drawloop:
   while (b4 || b2 || b1) { first=2; goto drawloop; }
 }
 
-Text()
+void Text()
 { char *str1, *str2, *str3,portrait,first=1;
 
   portrait=ResolveOperand();
@@ -220,7 +229,7 @@ drawloop:
   while (b4 || b2 || b1) { first=2; goto drawloop; }
 }
 
-AlterFTile()
+void AlterFTile()
 { unsigned short int tx,ty,tt;
   unsigned char o,buf;
 
@@ -237,7 +246,7 @@ AlterFTile()
   }
 }
 
-AlterBTile()
+void AlterBTile()
 { unsigned short int tx,ty,tt;
   unsigned char o,buf;
 
@@ -254,24 +263,24 @@ AlterBTile()
   }
 }
 
-FakeBattle()
+void FakeBattle()
 {
   battle();
 }
 
-PlayMusic()
+void PlayMusic()
 {
   GrabString(strbuf);
   playsong(strbuf);
   timer_count=0;
 }
 
-StopMusic()
+void StopMusic()
 {
   stopsound();
 }
 
-HealAll()
+void HealAll()
 { int i;
   char idx;
 
@@ -282,7 +291,7 @@ HealAll()
         pstats[idx].status=0; }
 }
 
-AlterParallax()
+void AlterParallax()
 { unsigned char t;
 
   t=ResolveOperand();
@@ -293,7 +302,7 @@ AlterParallax()
   pdivx=t; pdivy=t;
 }
 
-FadeIn()
+void FadeIn()
 { int i,s;
 
   s=ResolveOperand();
@@ -306,7 +315,7 @@ inloop:
   timer_count=0;
 }
 
-FadeOut()
+void FadeOut()
 { int i,s;
 
   s=ResolveOperand();
@@ -319,7 +328,7 @@ outloop:
    timer_count=0;
 }
 
-RemoveCharacter()
+void RemoveCharacter()
 { unsigned char c;
   char foundit=0,foundat=0;
   char i;
@@ -349,7 +358,7 @@ RemoveCharacter()
   timer_count=0;
 }
 
-Banner()
+void Banner()
 { char *str, first=1;
   int duration;
 
@@ -376,7 +385,7 @@ drawloop:
   timer_count=0; an=0;
 }
 
-EnforceAnimation()
+void EnforceAnimation()
 { /* -- ric:10/May/98 --
    * Temporarily removed to see if the bug this "fixes" still exists
   FILE *f;
@@ -400,7 +409,7 @@ EnforceAnimation()
   */
 }
 
-WaitKeyUp()
+void WaitKeyUp()
 {
   an=1;
 drawloop:
@@ -412,7 +421,7 @@ drawloop:
   an=0; timer_count=0;
 }
 
-DestroyItemProcessChar(unsigned char i, unsigned char c)
+void DestroyItemProcessChar(unsigned char i, unsigned char c)
 { unsigned char l,found=0,foundat=0;
 
   c--;
@@ -452,7 +461,7 @@ DestroyItemProcessChar(unsigned char i, unsigned char c)
          }
 }
 
-DestroyItem()
+void DestroyItem()
 { unsigned char i, c, l;
 
   i=ResolveOperand();
@@ -467,7 +476,7 @@ DestroyItem()
       DestroyItemProcessChar(i,l);
 }
 
-Prompt()
+void Prompt()
 { char *str1, *str2, *str3, *opt1, *opt2, portrait, first=1, selptr=0;
   unsigned short int flagidx;
 
@@ -491,7 +500,7 @@ drawloop:
   tmenubox(190,118,331,148);
   gotoxy(220,124); printstring(opt1);
   gotoxy(220,134); printstring(opt2);
-  tcopysprite(200,122+(selptr*10),16,16,&menuptr);
+  tcopysprite(200,122+(selptr*10),16,16,(char*)menuptr);
   vgadump();
   readcontrols();
 
@@ -509,7 +518,7 @@ drawloop:
   while (b4 || b2 || b1) { first=2; goto drawloop; }
 }
 
-ChainEvent ()
+void ChainEvent ()
 { char varcnt,i;
   unsigned short int t;
 
@@ -522,7 +531,7 @@ ChainEvent ()
   code=mapvc+scriptofstbl[t];
 }
 
-CallEvent () /* -- ric: 03/May/98 - Now saves temp vars across call -- */
+void CallEvent () /* -- ric: 03/May/98 - Now saves temp vars across call -- */
 { char varcnt,i,*buf, savetmpvar;
   unsigned short int t;
   int savetvar[26];    /* -- New -- */
@@ -541,7 +550,7 @@ CallEvent () /* -- ric: 03/May/98 - Now saves temp vars across call -- */
   code=buf;
 }
 
-Heal()
+void Heal()
 { unsigned short int chr, amt;
 
   chr=ResolveOperand();
@@ -552,7 +561,7 @@ Heal()
       pstats[chr].curhp = pstats[chr].maxhp;
 }
 
-EarthQuake()
+void EarthQuake()
 { int i,j,k;
   int nxw,nyw;
   char switchflag=0;
@@ -583,7 +592,7 @@ EarthQuake()
   vgadump();
 }
 
-SaveMenu()
+void SaveMenu()
 {
   LoadSaveErase(1);
   drawmap();
@@ -592,17 +601,17 @@ SaveMenu()
   timer_count=0;
 }
 
-EnableSave()
+void EnableSave()
 {
   saveflag=1;
 }
 
-DisableSave()
+void DisableSave()
 {
   saveflag=0;
 }
 
-ReviveChar()
+void ReviveChar()
 { short int a;
 
   a=ResolveOperand();
@@ -611,7 +620,7 @@ ReviveChar()
     pstats[a].curhp=1;
 }
 
-RestoreMP()
+void RestoreMP()
 { unsigned short int chr, amt;
 
   chr=ResolveOperand();
@@ -622,13 +631,13 @@ RestoreMP()
       pstats[chr].curmp = pstats[chr].maxmp;
 }
 
-Redraw()
+void Redraw()
 {
   drawmap();
   vgadump();
 }
 
-SText()
+void SText()
 { char *str1, *str2, *str3;
   char st1[31], st2[31], st3[31];
   char portrait, first=1, line=1, chr=0;
@@ -663,7 +672,7 @@ drawloop:
         }
 
   drawmap();
-  textwindow(portrait,&st1,&st2,&st3);
+  textwindow(portrait,st1,st2,st3);
   vgadump();
 
   while (!timer_count) { gp--; gp++; }
@@ -679,17 +688,17 @@ drawloop:
   while (b4 || b2 || b1) { first=2; goto drawloop; }
 }
 
-DisableMenu()
+void DisableMenu()
 {
   menuactive=0;
 }
 
-EnableMenu()
+void EnableMenu()
 {
   menuactive=1;
 }
 
-Wait()
+void Wait()
 { short int delaytime,ct2;
 
   delaytime=ResolveOperand();
@@ -709,7 +718,7 @@ main_loop:
   timer_count=0;
 }
 
-SetFace()
+void SetFace()
 { char c, d;
 
   c=ResolveOperand();
@@ -718,7 +727,7 @@ SetFace()
   party[c-1].facing=d;
 }
 
-MapPaletteGradient()
+void MapPaletteGradient()
 { int sc,fc,f,m;
 
   sc=ResolveOperand();
@@ -728,13 +737,13 @@ MapPaletteGradient()
 
   switch (m)
   {
-     case 0: ColorScale(&scrnxlatbl,sc,fc,f); screengradient=1; break;
-     case 1: ColorScale(&menuxlatbl,sc,fc,f); break;
-     case 2: ColorScale(&greyxlatbl,sc,fc,f); break;
+     case 0: ColorScale((char*)scrnxlatbl,sc,fc,f); screengradient=1; break;
+     case 1: ColorScale((char*)menuxlatbl,sc,fc,f); break;
+     case 2: ColorScale((char*)greyxlatbl,sc,fc,f); break;
   }
 }
 
-BoxFadeOut()
+void BoxFadeOut()
 { int duration,hd,vd;
 
   duration=ResolveOperand();
@@ -753,7 +762,7 @@ dloop:
   timer_count=0; an=0;
 }
 
-BoxFadeIn()
+void BoxFadeIn()
 { int duration,hd,vd;
 
   duration=ResolveOperand();
@@ -774,17 +783,17 @@ dloop:
   timer_count=0; an=0;
 }
 
-GiveGP()
+void GiveGP()
 {
   gp+=ResolveOperand();
 }
 
-TakeGP()
+void TakeGP()
 {
   gp-=ResolveOperand();
 }
 
-ChangeZone()
+void ChangeZone()
 { int x,y;
   unsigned char nz,b;
 
@@ -796,7 +805,7 @@ ChangeZone()
   mapp[(y*xsize)+x]=(nz << 1) | b;
 }
 
-GetItem()
+void GetItem()
 { short int c,d;
   int i,j;
 
@@ -812,7 +821,7 @@ GetItem()
   else pstats[c].inv[j-1]=d;
 }
 
-ForceEquip()
+void ForceEquip()
 { int c,i,a,b;
 
   c=ResolveOperand()-1;
@@ -825,7 +834,7 @@ ForceEquip()
   UpdateEquipStats();
 }
 
-GiveXP()
+void GiveXP()
 { int c,amt,fa,nx;
 
   c=ResolveOperand()-1;
@@ -849,7 +858,7 @@ GiveXP()
   }
 }
 
-Shop()
+void Shop()
 { int first=1,nv,p;
 
   // Egad.
@@ -891,7 +900,7 @@ drawloop:
 
 extern unsigned char pal[768], pal2[768];
 
-PaletteMorph()
+void PaletteMorph()
 { int r,g,b,percent,intensity,i,wr,wg,wb;
 
   r=ResolveOperand();
@@ -914,7 +923,7 @@ PaletteMorph()
      pal2[(i*3)+1]=wg*intensity/63;
      pal2[(i*3)+2]=wb*intensity/63;
   }
-  set_palette(&pal2);
+  set_palette(pal2);
 }
 
 int CharPos(char p1)
@@ -924,26 +933,26 @@ int CharPos(char p1)
        if (partyidx[i]==p1) return i;
 }
 
-ChangeCHR()
+void ChangeCHR()
 { int l;
   char *img;
   FILE *f;
 
   l=ResolveOperand();
-  GrabString(&pstats[l-1].chrfile);
-  img=chrs+(CharPos(l)*15360);
+  GrabString(pstats[l-1].chrfile);
+  img=(char*)chrs+(CharPos(l)*15360);
   f=fopen(pstats[l-1].chrfile,"rb");
   fread(img,1,15360,f);
   fclose(f);
 }
 
-VCPutPCX()
+void VCPutPCX()
 { int x,y,i;
 
-  GrabString(&stringbuffer);
+  GrabString(stringbuffer);
   x=ResolveOperand();
   y=ResolveOperand();
-  LoadPCXHeaderNP(&stringbuffer);
+  LoadPCXHeaderNP(stringbuffer);
 
   for (i=0; i<depth; i++)
   {
@@ -953,90 +962,90 @@ VCPutPCX()
   fclose(pcxf);
 }
 
-HookTimer()
+void HookTimer()
 { int l;
 
   hooktimer=ResolveOperand();
 }
 
-HookRetrace()
+void HookRetrace()
 {
   hookretrace=ResolveOperand();
 }
 
-VCLoadPCX()
+void VCLoadPCX()
 { int ofs,i;
 
-  GrabString(&stringbuffer);
+  GrabString(stringbuffer);
   ofs=ResolveOperand();
-  LoadPCXHeaderNP(&stringbuffer);
+  LoadPCXHeaderNP(stringbuffer);
 
   for (i=0; i<depth; i++)
   {
      vidoffset=(i*width)+ofs;
-     ReadPCXLine(vcdatabuf);
+     ReadPCXLine((unsigned char*)vcdatabuf);
   }
   fclose(pcxf);
 }
 
-VCcopysprite(int x, int y, int width, int height, char *spr)
-{ asm("movl %3, %%edx                   \n\t"
-      "movl %4, %%esi                   \n\t"
-"csl0:                                  \n\t"
-      "movl %1, %%eax                   \n\t"
-      "imul $320, %%eax                 \n\t"
-      "addl %0, %%eax                   \n\t"
-      "addl _vcscreen, %%eax            \n\t"
-      "movl %%eax, %%edi                \n\t"
-      "movl %2, %%ecx                   \n\t"
-      "shrl $1, %%ecx                   \n\t"
-      "jnc csl1                         \n\t"
-      "movsb                            \n\t"
-"csl1:                                  \n\t"
-      "repz                             \n\t"
-      "movsw                            \n\t"
-      "incl %1                          \n\t"
-      "decl %%edx                       \n\t"
-      "jnz csl0                         \n\t"
-      :
-      : "m" (x), "m" (y), "m" (width), "m" (height), "m" (spr)
-      : "eax","edx","esi","edi","ecx","cc" );
+void VCcopysprite(int x, int y, int width, int height, char *spr)
+{ //asm("movl %3, %%edx                   \n\t"
+//       "movl %4, %%esi                   \n\t"
+// "csl0:                                  \n\t"
+//       "movl %1, %%eax                   \n\t"
+//       "imul $320, %%eax                 \n\t"
+//       "addl %0, %%eax                   \n\t"
+//       "addl _vcscreen, %%eax            \n\t"
+//       "movl %%eax, %%edi                \n\t"
+//       "movl %2, %%ecx                   \n\t"
+//       "shrl $1, %%ecx                   \n\t"
+//       "jnc csl1                         \n\t"
+//       "movsb                            \n\t"
+// "csl1:                                  \n\t"
+//       "repz                             \n\t"
+//       "movsw                            \n\t"
+//       "incl %1                          \n\t"
+//       "decl %%edx                       \n\t"
+//       "jnz csl0                         \n\t"
+//       :
+//       : "m" (x), "m" (y), "m" (width), "m" (height), "m" (spr)
+//       : "eax","edx","esi","edi","ecx","cc" );
 }
 
-VCtcopysprite(int x, int y, int width, int height, char *spr)
-{ asm("movl %3, %%ecx                   \n\t"
-      "movl %4, %%esi                   \n\t"
-"tcsl0:                                 \n\t"
-      "movl %1, %%eax                   \n\t"
-      "imul $320, %%eax                 \n\t"
-      "addl %0, %%eax                   \n\t"
-      "addl _vcscreen, %%eax              \n\t"
-      "movl %%eax, %%edi                \n\t"
-      "movl %2, %%edx                   \n\t"
-"drawloop:                              \n\t"
-      "lodsb                            \n\t"
-      "orb %%al, %%al                   \n\t"
-      "jz nodraw                        \n\t"
-      "stosb                            \n\t"
-      "decl %%edx                       \n\t"
-      "orl %%edx, %%edx                 \n\t"
-      "jz endline                       \n\t"
-      "jmp drawloop                     \n\t"
-"nodraw:                                \n\t"
-      "incl %%edi                       \n\t"
-      "decl %%edx                       \n\t"
-      "orl %%edx, %%edx                 \n\t"
-      "jnz drawloop                     \n\t"
-"endline:                               \n\t"
-      "incl %1                          \n\t"
-      "decl %%ecx                       \n\t"
-      "jnz tcsl0                        \n\t"
-      :
-      : "m" (x), "m" (y), "m" (width), "m" (height), "m" (spr)
-      : "eax","edx","esi","edi","ecx","cc" );
+void VCtcopysprite(int x, int y, int width, int height, char *spr)
+{ //asm("movl %3, %%ecx                   \n\t"
+//       "movl %4, %%esi                   \n\t"
+// "tcsl0:                                 \n\t"
+//       "movl %1, %%eax                   \n\t"
+//       "imul $320, %%eax                 \n\t"
+//       "addl %0, %%eax                   \n\t"
+//       "addl _vcscreen, %%eax              \n\t"
+//       "movl %%eax, %%edi                \n\t"
+//       "movl %2, %%edx                   \n\t"
+// "drawloop:                              \n\t"
+//       "lodsb                            \n\t"
+//       "orb %%al, %%al                   \n\t"
+//       "jz nodraw                        \n\t"
+//       "stosb                            \n\t"
+//       "decl %%edx                       \n\t"
+//       "orl %%edx, %%edx                 \n\t"
+//       "jz endline                       \n\t"
+//       "jmp drawloop                     \n\t"
+// "nodraw:                                \n\t"
+//       "incl %%edi                       \n\t"
+//       "decl %%edx                       \n\t"
+//       "orl %%edx, %%edx                 \n\t"
+//       "jnz drawloop                     \n\t"
+// "endline:                               \n\t"
+//       "incl %1                          \n\t"
+//       "decl %%ecx                       \n\t"
+//       "jnz tcsl0                        \n\t"
+//       :
+//       : "m" (x), "m" (y), "m" (width), "m" (height), "m" (spr)
+//       : "eax","edx","esi","edi","ecx","cc" );
 }
 
-VCBlitImage()
+void VCBlitImage()
 { int x1,y1,xs,ys,ofs;
 
   x1=ResolveOperand();
@@ -1049,28 +1058,28 @@ VCBlitImage()
 }
 
 
-VCClear()
+void VCClear()
 {
   memset(vcscreen,0,64000);
 }
 
-VChline(int x, int y, int x2, char c)
-{  asm ("movl %2, %%ecx                 \n\t"
-        "subl %0, %%ecx                 \n\t"
-        "movl %1, %%eax                 \n\t"
-        "imul $320, %%eax               \n\t"
-        "addl %0, %%eax                 \n\t"
-        "addl _vcscreen, %%eax          \n\t"
-        "movl %%eax, %%edi              \n\t"
-        "movb %3, %%al                  \n\t"
-        "repz                           \n\t"
-        "stosb                          \n\t"
-        :
-        : "m" (x), "m" (y), "m" (x2), "m" (c)
-        : "eax","edi","ecx","cc" );
+void VChline(int x, int y, int x2, char c)
+{  //asm ("movl %2, %%ecx                 \n\t"
+        // "subl %0, %%ecx                 \n\t"
+        // "movl %1, %%eax                 \n\t"
+        // "imul $320, %%eax               \n\t"
+        // "addl %0, %%eax                 \n\t"
+        // "addl _vcscreen, %%eax          \n\t"
+        // "movl %%eax, %%edi              \n\t"
+        // "movb %3, %%al                  \n\t"
+        // "repz                           \n\t"
+        // "stosb                          \n\t"
+        // :
+        // : "m" (x), "m" (y), "m" (x2), "m" (c)
+        // : "eax","edi","ecx","cc" );
 }
 
-VCClearRegion()
+void VCClearRegion()
 { int x1,y1,x2,y2,i;
 
   x1=ResolveOperand();
@@ -1082,16 +1091,16 @@ VCClearRegion()
       VChline(x1,i,x2,0);
 }
 
-VCText()
+void VCText()
 { int x1,y1;
 
   x1=ResolveOperand();
   y1=ResolveOperand();
-  GrabString(&stringbuffer);
-  VCprintstring(x1,y1,&stringbuffer);
+  GrabString(stringbuffer);
+  VCprintstring(x1,y1,stringbuffer);
 }
 
-VCTBlitImage()
+void VCTBlitImage()
 { int x1,y1,xs,ys,ofs;
 
   x1=ResolveOperand();
@@ -1105,33 +1114,33 @@ VCTBlitImage()
 
 extern char qabort;
 
-Exit()
+void Exit()
 {
   qabort=1;
   killvc=1;
 }
 
-Quit()
+void Quit()
 {
   GrabString(strbuf);
   err(strbuf);
 }
 
-VCCenterText()
+void VCCenterText()
 { int x1,y1;
 
   y1=ResolveOperand();
-  GrabString(&stringbuffer);
-  x1=160-(strlen(&stringbuffer)*4);
-  VCprintstring(x1,y1,&stringbuffer);
+  GrabString(stringbuffer);
+  x1=160-(strlen(stringbuffer)*4);
+  VCprintstring(x1,y1,stringbuffer);
 }
 
-ResetTimer()
+void ResetTimer()
 {
   timer_count=0;
 }
 
-VCBlitTile()
+void VCBlitTile()
 { int x1, y1, t;
   char *img;
 
@@ -1139,33 +1148,33 @@ VCBlitTile()
   y1=ResolveOperand();
   t=ResolveOperand();
 
-  img=vsp0+(t*256);
+  img=(char*)vsp0+(t*256);
   VCtcopysprite(x1,y1,16,16,img);
 }
 
-Sys_ClearScreen()
+void Sys_ClearScreen()
 {
   memset(virscr,0,90000);
 }
 
-Sys_DisplayPCX()
+void Sys_DisplayPCX()
 {
-  GrabString(&stringbuffer);
-  loadpcx(&stringbuffer,virscr);
+  GrabString(stringbuffer);
+  loadpcx(stringbuffer,(char*)virscr);
 }
 
-OldStartupMenu()
+void OldStartupMenu()
 {
   StartupMenu();
 }
 
-NewGame()
+void NewGame()
 {
-  GrabString(&stringbuffer);
-  StartNewGame(&stringbuffer);
+  GrabString(stringbuffer);
+  StartNewGame(stringbuffer);
 }
 
-Delay()
+void Delay()
 { int s;
 
  s=ResolveOperand();
@@ -1177,7 +1186,7 @@ Delay()
                    err("Exiting: CTRL-ALT-DEL pressed.");
 }
 
-GetNextMove()
+void GetNextMove()
 {
   if (!party[0].scriptofs) return;
   if (!party[0].curcmd) GetNextCommand(0);
@@ -1213,7 +1222,7 @@ GetNextMove()
   if (!party[0].cmdarg) party[0].curcmd=0;
 }
 
-moveparty()
+void moveparty()
 {
  int i;
 
@@ -1238,7 +1247,7 @@ moveparty()
   if (!party[0].movcnt) party[0].moving=0;
 }
 
-MoveParty()
+void MoveParty()
 {
   if (party[0].speed<4)
   {
@@ -1259,10 +1268,10 @@ MoveParty()
   }
 }
 
-PartyMove()
+void PartyMove()
 {
-  party[0].scriptofs=code;
-  GrabString(&stringbuffer);
+  party[0].scriptofs=(unsigned char*)code;
+  GrabString(stringbuffer);
   timer_count=0;
 
 main_loop:
@@ -1280,7 +1289,7 @@ main_loop:
   if (party[0].scriptofs) goto main_loop;
 }
 
-EntityMove()
+void EntityMove()
 { int i;
 
   i=ResolveOperand();
@@ -1292,12 +1301,12 @@ EntityMove()
   party[i].cmdarg=0;
   party[i].chasing=0;
 
-  party[i].scriptofs=code;
-  GrabString(&stringbuffer);
+  party[i].scriptofs=(unsigned char*)code;
+  GrabString(stringbuffer);
   party[i].movecode=4;
 }
 
-AutoOn()
+void AutoOn()
 { int i;
 
   memset(&party[95].x, 0, 440);
@@ -1317,48 +1326,48 @@ AutoOn()
   drawparty=0;
 }
 
-AutoOff()
+void AutoOff()
 {
   autoent=0;
   drawparty=1;
 }
 
-EntityMoveScript()
+void EntityMoveScript()
 { int i;
 
   i=ResolveOperand();
   party[i].movescript=ResolveOperand();
-  party[i].scriptofs=msbuf+msofstbl[party[i].movescript];
+  party[i].scriptofs=(unsigned char*)msbuf+msofstbl[party[i].movescript];
   party[i].movecode=4;
   party[i].curcmd=0;
 }
 
-VCTextNum()
+void VCTextNum()
 { int x1,y1,i;
 
   x1=ResolveOperand();
   y1=ResolveOperand();
   i=ResolveOperand();
-  dec_to_asciiz(i,&stringbuffer);
-  VCprintstring(x1,y1,&stringbuffer);
+  dec_to_asciiz(i,stringbuffer);
+  VCprintstring(x1,y1,stringbuffer);
 }
 
-VCLoadRaw()
+void VCLoadRaw()
 { int vcofs, fofs, flen;
   FILE *f;
 
-  GrabString(&stringbuffer);
+  GrabString(stringbuffer);
   vcofs=ResolveOperand();
   fofs=ResolveOperand();
   flen=ResolveOperand();
 
-  f=fopen(&stringbuffer,"rb");
+  f=fopen(stringbuffer,"rb");
   fseek(f,fofs,0);
   fread(vcdatabuf+vcofs, flen, 1, f);
   fclose(f);
 }
 
-ExecLibFunc(unsigned char func)
+void ExecLibFunc(unsigned char func)
 {
   switch (func)
   { case 1: MapSwitch(); break;
@@ -1472,7 +1481,7 @@ ExecLibFunc(unsigned char func)
   }
 }
 
-int ReadVar0(int var)
+long ReadVar0(int var)
 {
   switch (var)
   {
@@ -1551,11 +1560,11 @@ int ReadVar0(int var)
    case 70: return layervc2; /* -- xBig_D: 05/May/98 */
    case 71: return layervc2trans; /* -- xBig_D: 05/May/98 */
    case 72: return layervcwrite; /* -- xBig_D: 05/May/98 */
-   case 73: return mp_sngpos; /* -- xBig_D: 10/May/98 */
+   case 73: return 0;//mp_sngpos; /* -- xBig_D: 10/May/98 */
   }
 }
 
-WriteVar0(int var,int value)
+void WriteVar0(int var,int value)
 {
   switch (var)
   {
@@ -1642,11 +1651,13 @@ WriteVar0(int var,int value)
     case 70: layervc2=value; return; /* -- xBig_D: 05/May/98 */
     case 71: layervc2trans=value; return; /* -- xBig_D: 05/May/98 */
     case 72: vcwritelayer(value); return; /* -- xBig_D: 05/May/98 */
-    case 73: MP_SetPosition(value); return; /* -- xBig_D: 10/May/98 */
+    case 73:
+    // MP_SetPosition(value);
+    return; /* -- xBig_D: 10/May/98 */
   }
 }
 
-int ReadVar1(int var, int arg1)
+long ReadVar1(int var, int arg1)
 { int i,j,l;
 
   switch (var)
@@ -1692,7 +1703,7 @@ int ReadVar1(int var, int arg1)
     case 30: return party[arg1].chasing;
     case 31: return party[arg1].chasedist;
     case 32: return party[arg1].chasespeed;
-    case 33: return party[arg1].scriptofs;
+    case 33: return (long)party[arg1].scriptofs;
     case 34: return pstats[arg1-1].atk;
     case 35: return pstats[arg1-1].def;
     case 36: return pstats[arg1-1].hitc;
@@ -1727,7 +1738,7 @@ int ReadVar1(int var, int arg1)
   }
 }
 
-WriteVar1(int var, int arg1, int value)
+void WriteVar1(int var, int arg1, int value)
 {
   switch (var)
   {
@@ -1770,7 +1781,7 @@ WriteVar1(int var, int arg1, int value)
   }
 }
 
-int ReadVar2(int var, int arg1, int arg2)
+long ReadVar2(int var, int arg1, int arg2)
 { int i,j,l;
 
   switch (var)
@@ -1785,19 +1796,19 @@ int ReadVar2(int var, int arg1, int arg2)
     case 2: return pstats[arg1].inv[arg2];
 
      /* -- ric: 24/Apr/98 --
-      * CanEquip(party.dat index, item.dat index) (R) (24/Apr/98) 
+      * CanEquip(party.dat index, item.dat index) (R) (24/Apr/98)
       * ChooseChar(x,y)                           (R) (25/Apr/98) -- */
     case 3: return (items[arg2].equipflag && equip[items[arg2].equipidx].equipable[arg1]);
     case 4: return ChooseChar(arg1, arg2);
 
     /* NichG: Whenever */
-    case 5: return ObstructionAt(arg1, arg2);   
+    case 5: return ObstructionAt(arg1, arg2);
     case 6: return pstats[arg1].maginv[arg2];
 
   }
 }
 
-WriteVar2(int var, int arg1, int arg2, int value)
+void WriteVar2(int var, int arg1, int arg2, int value)
 {
   switch (var)
   {

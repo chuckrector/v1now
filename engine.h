@@ -1,3 +1,6 @@
+#ifndef ENGINE_H
+#define ENGINE_H
+
 struct r_entity {                      // on-screen entities (chars)
   unsigned short x;                    // xwc position
   unsigned short y;                    // ywc position
@@ -22,6 +25,15 @@ struct r_entity {                      // on-screen entities (chars)
   unsigned short cx,cy;                // current-tile pos (moving adjusted)
   int expand1;                         // always room for improvement
   char entitydesc[20];                 // Editing description
+};
+
+struct zoneinfo {                      // zone data
+  char zonename[15];                   // zone description
+  unsigned short int callevent;        // event number to call
+  unsigned char percent;               // chance (in 255) of event occurance
+  unsigned char delay;                 // step-delay before last occurance
+  unsigned char aaa;                   // accept adjacent activation
+  char savedesc[30];                   // savegame description
 };
 
 struct charstats {                     // Stat record for single character
@@ -121,7 +133,7 @@ extern struct mequipstruc mequip[255];
 
 extern struct equipstruc equip[255];
 extern unsigned short int nx,ny;
-extern short int flags[8000],numtiles;
+extern unsigned int flags[8000],numtiles;
 
 
 extern char partyidx[5];
@@ -129,7 +141,20 @@ extern unsigned char *itemicons,*chrs,*chr2;
 extern int gp,xwin,ywin,xtc,ytc,xofs,yofs;
 extern unsigned short int *map0, *map1,xsize,ysize,vadelay[100];
 extern unsigned char *mapp,layerc,pmultx,pdivx,pmulty,pdivy,saveflag;
-extern unsigned char *vsp0, autoent;
+extern unsigned char *vsp0;
+extern unsigned char autoent;
 
 extern void *valloc(int amount, char * whatfor);
 extern void vfree(void *thismem);
+extern void addcharacter(int i);
+extern void UpdateEquipStats();
+extern void startmap(char* fname);
+extern void load_map(char* fname);
+extern void check_tileanimation();
+extern void process_entities();
+extern void startfollow();
+extern void lastmove(char n);
+extern int ObstructionAt(int tx, int ty);
+extern void allocbuffers();
+
+#endif

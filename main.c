@@ -3,12 +3,21 @@
 // Copyright (C)1997 BJ Eirich
 
 #include <stdio.h>
+#include <stdlib.h> // exit
+#include <time.h> // time
+#include <string.h> // memset
+#include "util.h"
 #include "control.h"
 #include "engine.h"
 #include "keyboard.h"
 #include "render.h"
 #include "timer.h"
 #include "vga.h"
+#include "sound.h"
+#include "vclib.h"
+#include "menu.h"
+#include "menu2.h"
+#include "vc.h"
 
 unsigned char *strbuf,*speech;
 extern unsigned char menuptr[256],qabort,itmptr[576],charptr[960];
@@ -19,7 +28,7 @@ extern char *magicvc;
 // END NEW
 
 extern unsigned int effectofstbl[1024],startupofstbl[1024],magicofstbl[1024];
-       
+
 int Exist(char *fname)
 { FILE *tempf;
 
@@ -32,20 +41,20 @@ int Exist(char *fname)
   else return 0;
 }
 
-err(char *ermsg)
+void err(char *ermsg)
 {
   keyboard_close();
   stopsound();
-  MD_Exit();
+  // MD_Exit();
   timer_close();
   closevga();
   printf("%s \n",ermsg);
   exit(-1);
 }
 
-MiscSetup()
+void MiscSetup()
 {
-  strbuf=valloc(100,"strbuf");
+  strbuf=(unsigned char*)valloc(100,"strbuf");
   keyboard_init();
   keyboard_chain(0);
   sound_init();
@@ -59,7 +68,7 @@ MiscSetup()
     printf("Warning: startup.scr found, this file is no longer used \n");
 }
 
-PutOwnerText()
+void PutOwnerText()
 { int i;
 
   printf("VERGE - System version 04.Jun.98\n");
@@ -69,59 +78,60 @@ PutOwnerText()
   printf("--\n");
   printf("vecna, hahn, zeromus, McGrue, Locke, aen, Ric, NichG, xBig_D\n");
 
-  delay(500);
+  // delay(500);
 
   get_palette();
   for (i=63; i>=0; i--)
       { set_intensity(i);
-        delay(10); }
+        //delay(10);
+      }
 }
 
-InitPStats()
+void InitPStats()
 { FILE *pdat,*cdat;
   char i;
   pdat=fopen("PARTY.DAT","r");
   if (!pdat) err("Fatal error: PARTY.DAT not found");
   fscanf(pdat,"%s",strbuf);
-  tchars=atoi(strbuf);
+  tchars=atoi((const char*)strbuf);
   for (i=0; i<tchars; i++)
       { fscanf(pdat,"%s",&pstats[i].chrfile);
         fscanf(pdat,"%s",strbuf);
         fscanf(pdat,"%s",strbuf);
-        cdat=fopen(strbuf,"r");
+        cdat=fopen((const char*)strbuf,"r");
         if (!cdat) err("Could not open character DAT file.");
         fscanf(cdat,"%s",&pstats[i].name);
-        fgets(strbuf,99,cdat);
-        fgets(strbuf,99,cdat);
+        fgets((char*)strbuf,99,cdat);
+        fgets((char*)strbuf,99,cdat);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].exp=atoi(strbuf);
+        pstats[i].exp=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].curhp=atoi(strbuf);
-        pstats[i].maxhp=atoi(strbuf);
+        pstats[i].curhp=atoi((const char*)strbuf);
+        pstats[i].maxhp=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].curmp=atoi(strbuf);
-        pstats[i].maxmp=atoi(strbuf);
+        pstats[i].curmp=atoi((const char*)strbuf);
+        pstats[i].maxmp=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].str=atoi(strbuf);
+        pstats[i].str=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].end=atoi(strbuf);
+        pstats[i].end=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].mag=atoi(strbuf);
+        pstats[i].mag=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].mgr=atoi(strbuf);
+        pstats[i].mgr=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].hit=atoi(strbuf);
+        pstats[i].hit=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].dod=atoi(strbuf);
+        pstats[i].dod=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].mbl=atoi(strbuf);
+        pstats[i].mbl=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].fer=atoi(strbuf);
+        pstats[i].fer=atoi((const char*)strbuf);
         fscanf(cdat,"%s",strbuf);
-        pstats[i].rea=atoi(strbuf);
+        pstats[i].rea=atoi((const char*)strbuf);
         pstats[i].lv=1;
         fscanf(cdat,"%s",strbuf);
-        pstats[i].nxt=atoi(strbuf);
+        pstats[i].nxt=atoi((const char*)strbuf);
         pstats[i].status=0;
         pstats[i].invcnt=6;
         memset(&pstats[i].inv, 0, 512);
@@ -130,7 +140,7 @@ InitPStats()
   fclose(pdat);
 }
 
-StartNewGame(char *startp)
+void StartNewGame(char *startp)
 { int i;
 
   numchars=0;
@@ -146,7 +156,7 @@ StartNewGame(char *startp)
   startmap(startp);
 }
 
-LoadGame(char *fn)
+void LoadGame(char *fn)
 { FILE *f;
   char i,b;
 
@@ -175,10 +185,10 @@ LoadGame(char *fn)
   nx=party[0].x/16;
   ny=party[0].y/16;
   usenxy=1;
-  startmap(&mapname);
+  startmap(mapname);
 }
 
-ProcessEquipDat()
+void ProcessEquipDat()
 { FILE *f;
   int a,i,t;
   int i2;
@@ -193,36 +203,36 @@ ProcessEquipDat()
   for (i=1; i<=a; i++)
   {
     pl1:
-      fscanf(f,"%s",strbuf); strupr(strbuf);
-      if (!strcmp(strbuf,"//")) { fgets(strbuf,99,f); goto pl1; }
-      if (!strcmp(strbuf,"ATK")) { fscanf(f,"%s",strbuf);
-                                   equip[i].str=atoi(strbuf); goto pl1; }
-      if (!strcmp(strbuf,"DEF")) { fscanf(f,"%s",strbuf);
-                                   equip[i].end=atoi(strbuf); goto pl1; }
-      if (!strcmp(strbuf,"MAG")) { fscanf(f,"%s",strbuf);
-                                   equip[i].mag=atoi(strbuf); goto pl1; }
-      if (!strcmp(strbuf,"MGR")) { fscanf(f,"%s",strbuf);
-                                   equip[i].mgr=atoi(strbuf); goto pl1; }
-      if (!strcmp(strbuf,"HIT")) { fscanf(f,"%s",strbuf);
-                                   equip[i].hit=atoi(strbuf); goto pl1; }
-      if (!strcmp(strbuf,"DOD")) { fscanf(f,"%s",strbuf);
-                                   equip[i].dod=atoi(strbuf); goto pl1; }
-      if (!strcmp(strbuf,"MBL")) { fscanf(f,"%s",strbuf);
-                                   equip[i].mbl=atoi(strbuf); goto pl1; }
-      if (!strcmp(strbuf,"FER")) { fscanf(f,"%s",strbuf);
-                                   equip[i].fer=atoi(strbuf); goto pl1; }
-      if (!strcmp(strbuf,"REA")) { fscanf(f,"%s",strbuf);
-                                   equip[i].rea=atoi(strbuf); goto pl1; }
-      if (!strcmp(strbuf,"ONEQUIP")) { fscanf(f,"%s",strbuf);
-                                       equip[i].onequip=atoi(strbuf)+1; goto pl1; }
-      if (!strcmp(strbuf,"ONDEEQUIP")) { fscanf(f,"%s",strbuf);
-                                         equip[i].ondeequip=atoi(strbuf)+1; goto pl1; }
-      if (!strcmp(strbuf,"EQABLE"))
+      fscanf(f,"%s",strbuf); strupr((char*)strbuf);
+      if (!strcmp((char*)strbuf,"//")) { fgets((char*)strbuf,99,f); goto pl1; }
+      if (!strcmp((char*)strbuf,"ATK")) { fscanf(f,"%s",strbuf);
+                                   equip[i].str=atoi((const char*)strbuf); goto pl1; }
+      if (!strcmp((char*)strbuf,"DEF")) { fscanf(f,"%s",strbuf);
+                                   equip[i].end=atoi((const char*)strbuf); goto pl1; }
+      if (!strcmp((char*)strbuf,"MAG")) { fscanf(f,"%s",strbuf);
+                                   equip[i].mag=atoi((const char*)strbuf); goto pl1; }
+      if (!strcmp((char*)strbuf,"MGR")) { fscanf(f,"%s",strbuf);
+                                   equip[i].mgr=atoi((const char*)strbuf); goto pl1; }
+      if (!strcmp((char*)strbuf,"HIT")) { fscanf(f,"%s",strbuf);
+                                   equip[i].hit=atoi((const char*)strbuf); goto pl1; }
+      if (!strcmp((char*)strbuf,"DOD")) { fscanf(f,"%s",strbuf);
+                                   equip[i].dod=atoi((const char*)strbuf); goto pl1; }
+      if (!strcmp((char*)strbuf,"MBL")) { fscanf(f,"%s",strbuf);
+                                   equip[i].mbl=atoi((const char*)strbuf); goto pl1; }
+      if (!strcmp((char*)strbuf,"FER")) { fscanf(f,"%s",strbuf);
+                                   equip[i].fer=atoi((const char*)strbuf); goto pl1; }
+      if (!strcmp((char*)strbuf,"REA")) { fscanf(f,"%s",strbuf);
+                                   equip[i].rea=atoi((const char*)strbuf); goto pl1; }
+      if (!strcmp((char*)strbuf,"ONEQUIP")) { fscanf(f,"%s",strbuf);
+                                       equip[i].onequip=atoi((const char*)strbuf)+1; goto pl1; }
+      if (!strcmp((char*)strbuf,"ONDEEQUIP")) { fscanf(f,"%s",strbuf);
+                                         equip[i].ondeequip=atoi((const char*)strbuf)+1; goto pl1; }
+      if (!strcmp((char*)strbuf,"EQABLE"))
       {
         eqloop:
           fscanf(f,"%s",strbuf);
-          if (!strcmp(strbuf,"-")) continue;
-          equip[i].equipable[atoi(strbuf)-1]=1;
+          if (!strcmp((char*)strbuf,"-")) continue;
+          equip[i].equipable[atoi((const char*)strbuf)-1]=1;
           goto eqloop;
       }
   }
@@ -234,23 +244,23 @@ ProcessEquipDat()
   for (i=1; i<=a; i++)
   {
     mpl1:
-      fscanf(f,"%s",strbuf); strupr(strbuf);
-      if (!strcmp(strbuf,"//")) { fgets(strbuf,99,f); goto mpl1; }
+      fscanf(f,"%s",strbuf); strupr((char*)strbuf);
+      if (!strcmp((char*)strbuf,"//")) { fgets((char*)strbuf,99,f); goto mpl1; }
 
-      if (!strcmp(strbuf,"EQABLE"))
+      if (!strcmp((char*)strbuf,"EQABLE"))
       {
         meqloop:
           fscanf(f,"%s",strbuf);
-          if (!strcmp(strbuf,"-")) continue;
-          mequip[i].equipable[atoi(strbuf)-1]=1;
+          if (!strcmp((char*)strbuf,"-")) continue;
+          mequip[i].equipable[atoi((const char*)strbuf)-1]=1;
           goto meqloop;
       }
-      if (!strcmp(strbuf,"LEVEL"))
+      if (!strcmp((char*)strbuf,"LEVEL"))
       {
         mlevloop:
           fscanf(f,"%s",strbuf);
-          if (!strcmp(strbuf,"-")) continue;
-          i2 = atoi(strbuf);
+          if (!strcmp((char*)strbuf,"-")) continue;
+          i2 = atoi((const char*)strbuf);
           mequip[i].level[i2-1]=1;
           goto mlevloop;
       }
@@ -259,7 +269,7 @@ ProcessEquipDat()
 // END NEW
 }
 
-InitItems()
+void InitItems()
 { FILE *f;
   unsigned char b,i;
   int j;
@@ -272,26 +282,26 @@ InitItems()
   f=fopen("ITEMS.DAT","r");
   if (!f) err("Could not open ITEMS.DAT.");
   fscanf(f,"%s",strbuf);
-  b=atoi(strbuf);
+  b=atoi((const char*)strbuf);
   for (i=1; i<b+1; i++)
       { fscanf(f,"%s",items[i].name);
         fscanf(f,"%s",strbuf);
-        items[i].icon=atoi(strbuf)+1;
+        items[i].icon=atoi((const char*)strbuf)+1;
         fscanf(f,"%s",items[i].desc);
         fscanf(f,"%s",strbuf);
-        items[i].useflag=atoi(strbuf);
+        items[i].useflag=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        items[i].useeffect=atoi(strbuf);
+        items[i].useeffect=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        items[i].itemtype=atoi(strbuf);
+        items[i].itemtype=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        items[i].equipflag=atoi(strbuf);
+        items[i].equipflag=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        items[i].equipidx=atoi(strbuf);
+        items[i].equipidx=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        items[i].itmprv=atoi(strbuf);
+        items[i].itmprv=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        items[i].price=atoi(strbuf); }
+        items[i].price=atoi((const char*)strbuf); }
   fclose(f);
 
   // *** NEW ***  MAGIC INIT
@@ -305,28 +315,28 @@ InitItems()
   f=fopen("MAGIC.DAT","r");
   if (!f) err("Could not open MAGIC.DAT.");
   fscanf(f,"%s",strbuf);
-  b=atoi(strbuf);
+  b=atoi((const char*)strbuf);
   for (i=1; i<b+1; i++)
       { fscanf(f,"%s",magic[i].name);
         fscanf(f,"%s",strbuf);
-        magic[i].icon=atoi(strbuf)+1;
+        magic[i].icon=atoi((const char*)strbuf)+1;
         fscanf(f,"%s",magic[i].desc);
         fscanf(f,"%s",strbuf);
-        magic[i].useflag=atoi(strbuf);
+        magic[i].useflag=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        magic[i].useeffect=atoi(strbuf);
+        magic[i].useeffect=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        magic[i].itemtype=atoi(strbuf);
+        magic[i].itemtype=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        magic[i].equipflag=atoi(strbuf);
+        magic[i].equipflag=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        magic[i].equipidx=atoi(strbuf);
+        magic[i].equipidx=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        magic[i].itmprv=atoi(strbuf);
+        magic[i].itmprv=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        magic[i].price=atoi(strbuf); 
+        magic[i].price=atoi((const char*)strbuf);
         fscanf(f,"%s",strbuf);
-        magic[i].cost=atoi(strbuf); }
+        magic[i].cost=atoi((const char*)strbuf); }
   fclose(f);
 
   f=fopen("MAGIC.VCS","rb");
@@ -369,7 +379,7 @@ InitItems()
   fclose(f);
 }
 
-StartupMenu()
+void StartupMenu()
 { char cursel=0;
   int i,s;
 
@@ -382,9 +392,9 @@ drawloop:
   gotoxy(130,123);
   printstring("Exit to DOS");
 
-  if (!cursel) tcopysprite(110,102,16,16,&menuptr);
-  if (cursel==1) tcopysprite(110,112,16,16,&menuptr);
-  if (cursel==2) tcopysprite(110,122,16,16,&menuptr);
+  if (!cursel) tcopysprite(110,102,16,16,(char*)menuptr);
+  if (cursel==1) tcopysprite(110,112,16,16,(char*)menuptr);
+  if (cursel==2) tcopysprite(110,122,16,16,(char*)menuptr);
 
   vgadump();
   while ((down) || (up)) readcontrols();
@@ -413,7 +423,7 @@ fadeloop:          i=(timer_count*64)/s; i=64-i;
                    err(""); }
 }
 
-main()
+int main()
 {
   MiscSetup();
   PutOwnerText();
@@ -436,4 +446,5 @@ main()
 
     StartupScript();
   }
+  return(0);
 }

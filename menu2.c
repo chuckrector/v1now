@@ -3,11 +3,20 @@
 // Copyright (C)1997 BJ Eirich
 
 #include <stdio.h>
+#include <string.h> // strcmp
+#include <stdlib.h> // atoi
 #include "control.h"
 #include "engine.h"
 #include "keyboard.h"
 #include "timer.h"
 #include "vga.h"
+#include "sound.h"
+#include "pcx.h"
+#include "render.h"
+#include "menu.h"
+#include "vc.h"
+
+extern void err(char* ermgs);
 
 char sg1[]="SAVEDAT.000";
 char sg2[]="SAVEDAT.001";
@@ -22,11 +31,11 @@ struct menu {
 };
 
 struct menu menus[4];
-unsigned char itmptr[576],gsimg[512],iuflag=0;
-extern unsigned char menuptr[256],*strbuf;
+unsigned char gsimg[512],iuflag=0;
+extern unsigned char *strbuf;
 extern short int varl[10];
 
-greyscale(int width, int height, unsigned char *src, unsigned char *dest)
+void greyscale(int width, int height, unsigned char *src, unsigned char *dest)
 { int i,j;
   unsigned char r,g,b,c;
 
@@ -47,7 +56,9 @@ greyscale(int width, int height, unsigned char *src, unsigned char *dest)
           dest[(j*width)+i]=c; }
 }
 
-LoadSaveErase(char mode)
+extern void LoadGame(char* fn);
+extern void SaveGame(char* fn);
+void LoadSaveErase(char mode)
 // The Save Game / Load Game / Erase Game menu interface. Since the three
 // functions are almost identical in their interface, I crammed them all
 // into one function, using the Mode variable to specify the intent.
@@ -70,29 +81,29 @@ redraw:
 parseloop:
   fscanf(f,"%s",strbuf);
 
-  if (strcmp(strbuf,"background")==0) {
+  if (strcmp((const char*)strbuf,"background")==0) {
      fscanf(f,"%s",strbuf);
-     loadpcx(strbuf,virscr);
+     loadpcx((char*)strbuf,(char*)virscr);
      goto parseloop; }
 
-  if (strcmp(strbuf,"print")==0) {
+  if (strcmp((const char*)strbuf,"print")==0) {
      fscanf(f,"%u",&i); i+=16;
      fscanf(f,"%u",&j); j+=16;
      gotoxy(i,j); fscanf(f,"%s",strbuf);
-     printstring(strbuf);
+     printstring((char*)strbuf);
      goto parseloop; }
 
-  if (strcmp(strbuf,"printb")==0) {
+  if (strcmp((const char*)strbuf,"printb")==0) {
      fscanf(f,"%u",&i); i+=16;
      fscanf(f,"%u",&j); j+=16;
      gotoxy(i,j); fscanf(f,"%s",strbuf);
-     bigprintstring(strbuf);
+     bigprintstring((char*)strbuf);
      goto parseloop; }
 
-  if (strcmp(strbuf,":selectors")==0) {
+  if (strcmp((const char*)strbuf,":selectors")==0) {
      for (i=0; i<4; i++)
-         { fscanf(f,"%s",strbuf); menus[i].posx=atoi(strbuf)+16;
-           fscanf(f,"%s",strbuf); menus[i].posy=atoi(strbuf)+16; }
+         { fscanf(f,"%s",strbuf); menus[i].posx=atoi((const char*)strbuf)+16;
+           fscanf(f,"%s",strbuf); menus[i].posy=atoi((const char*)strbuf)+16; }
      goto parseloop; }
   fclose(f);
 
@@ -104,57 +115,57 @@ parseloop:
       else { menus[i].linktype=1;
              fread(strbuf,1,30,f);
              gotoxy(menus[i].posx+90,menus[i].posy+1);
-             printstring(strbuf);
+             printstring((char*)strbuf);
              fread(strbuf,1,9,f);
              gotoxy(menus[i].posx+90,menus[i].posy+11);
-             printstring(strbuf);
+             printstring((char*)strbuf);
              fread(&j,1,4,f);
-             dec_to_asciiz(j,strbuf);
+             dec_to_asciiz(j,(char*)strbuf);
              gotoxy(menus[i].posx+162,menus[i].posy+11);
-             printstring("LV ");printstring(strbuf);
+             printstring("LV ");printstring((char*)strbuf);
              fread(&j,1,4,f);
              gotoxy(menus[i].posx+230,menus[i].posy+11);
-             dec_to_asciiz(j,strbuf);
-             printstring(strbuf);printstring("/");
+             dec_to_asciiz(j,(char*)strbuf);
+             printstring((char*)strbuf);printstring("/");
              fread(&j,1,4,f);
-             dec_to_asciiz(j,strbuf);
-             printstring(strbuf);
+             dec_to_asciiz(j,(char*)strbuf);
+             printstring((char*)strbuf);
              fread(&j,1,4,f);
              gotoxy(menus[i].posx+90,menus[i].posy+21);
-             dec_to_asciiz(j,strbuf);
-             printstring(strbuf);
+             dec_to_asciiz(j,(char*)strbuf);
+             printstring((char*)strbuf);
              printstring(" G");
              fread(&b,1,1,f);
              gotoxy(menus[i].posx+162,menus[i].posy+21);
-             dec_to_asciiz(b,strbuf);if (b<10) printstring("0");
-             printstring(strbuf);printstring(":");
-             fread(&b,1,1,f);dec_to_asciiz(b,strbuf);
-             if (b<10) printstring("0"); printstring(strbuf);
+             dec_to_asciiz(b,(char*)strbuf);if (b<10) printstring("0");
+             printstring((char*)strbuf);printstring(":");
+             fread(&b,1,1,f);dec_to_asciiz(b,(char*)strbuf);
+             if (b<10) printstring("0"); printstring((char*)strbuf);
              fread(&b,1,2,f);
              fread(&j,1,1,f);
-             if (!i) img=&buf1;
-             if (i==1) img=&buf2;
-             if (i==2) img=&buf3;
-             if (i==3) img=&buf4;
+             if (!i) img=(char*)buf1;
+             if (i==1) img=(char*)buf2;
+             if (i==2) img=(char*)buf3;
+             if (i==3) img=(char*)buf4;
              fread(img,1,2560,f);
-             greyscale(80,32,img,&tbuf);
+             greyscale(80,32,(unsigned char*)img,tbuf);
 
-             tcopysprite(menus[i].posx,menus[i].posy,16,32,&tbuf);
-             tcopysprite(menus[i].posx+16,menus[i].posy,16,32,&tbuf[512]);
-             tcopysprite(menus[i].posx+32,menus[i].posy,16,32,&tbuf[1024]);
-             tcopysprite(menus[i].posx+48,menus[i].posy,16,32,&tbuf[1536]);
-             tcopysprite(menus[i].posx+64,menus[i].posy,16,32,&tbuf[2048]); }
+             tcopysprite(menus[i].posx,menus[i].posy,16,32,(char*)tbuf);
+             tcopysprite(menus[i].posx+16,menus[i].posy,16,32,(char*)&tbuf[512]);
+             tcopysprite(menus[i].posx+32,menus[i].posy,16,32,(char*)&tbuf[1024]);
+             tcopysprite(menus[i].posx+48,menus[i].posy,16,32,(char*)&tbuf[1536]);
+             tcopysprite(menus[i].posx+64,menus[i].posy,16,32,(char*)&tbuf[2048]); }
       fclose(f); }
 
   mpos=0;
-  grabregion(menus[0].posx-16,menus[0].posy+10,16,16,&rbuf);
-  tcopysprite(menus[0].posx-16,menus[0].posy+10,16,16,&menuptr);
+  grabregion(menus[0].posx-16,menus[0].posy+10,16,16,(char*)rbuf);
+  tcopysprite(menus[0].posx-16,menus[0].posy+10,16,16,(char*)menuptr);
   if (menus[0].linktype) {
-     tcopysprite(menus[0].posx,menus[0].posy,16,32,&buf1);
-     tcopysprite(menus[0].posx+16,menus[0].posy,16,32,&buf1[512]);
-     tcopysprite(menus[0].posx+32,menus[0].posy,16,32,&buf1[1024]);
-     tcopysprite(menus[0].posx+48,menus[0].posy,16,32,&buf1[1536]);
-     tcopysprite(menus[0].posx+64,menus[0].posy,16,32,&buf1[2048]); }
+     tcopysprite(menus[0].posx,menus[0].posy,16,32,(char*)buf1);
+     tcopysprite(menus[0].posx+16,menus[0].posy,16,32,(char*)&buf1[512]);
+     tcopysprite(menus[0].posx+32,menus[0].posy,16,32,(char*)&buf1[1024]);
+     tcopysprite(menus[0].posx+48,menus[0].posy,16,32,(char*)&buf1[1536]);
+     tcopysprite(menus[0].posx+64,menus[0].posy,16,32,(char*)&buf1[2048]); }
   vgadump();
   if (!r) fin();
   if (r) while (b1) readcontrols();
@@ -163,26 +174,26 @@ inputloop:
   readcontrols();
 
   if (down) {
-     copysprite(menus[mpos].posx-16,menus[mpos].posy+10,16,16,&rbuf);
-     if (!mpos) img=&buf1;
-     if (mpos==1) img=&buf2;
-     if (mpos==2) img=&buf3;
-     if (mpos==3) img=&buf4;
+     copysprite(menus[mpos].posx-16,menus[mpos].posy+10,16,16,(char*)rbuf);
+     if (!mpos) img=(char*)buf1;
+     if (mpos==1) img=(char*)buf2;
+     if (mpos==2) img=(char*)buf3;
+     if (mpos==3) img=(char*)buf4;
      if (menus[mpos].linktype) {
-        greyscale(80,32,img,&tbuf);
-        tcopysprite(menus[mpos].posx,menus[mpos].posy,16,32,&tbuf);
-        tcopysprite(menus[mpos].posx+16,menus[mpos].posy,16,32,&tbuf[512]);
-        tcopysprite(menus[mpos].posx+32,menus[mpos].posy,16,32,&tbuf[1024]);
-        tcopysprite(menus[mpos].posx+48,menus[mpos].posy,16,32,&tbuf[1536]);
-        tcopysprite(menus[mpos].posx+64,menus[mpos].posy,16,32,&tbuf[2048]); }
+        greyscale(80,32,(unsigned char*)img,tbuf);
+        tcopysprite(menus[mpos].posx,menus[mpos].posy,16,32,(char*)tbuf);
+        tcopysprite(menus[mpos].posx+16,menus[mpos].posy,16,32,(char*)&tbuf[512]);
+        tcopysprite(menus[mpos].posx+32,menus[mpos].posy,16,32,(char*)&tbuf[1024]);
+        tcopysprite(menus[mpos].posx+48,menus[mpos].posy,16,32,(char*)&tbuf[1536]);
+        tcopysprite(menus[mpos].posx+64,menus[mpos].posy,16,32,(char*)&tbuf[2048]); }
      mpos++; if (mpos==4) mpos=0;
-     grabregion(menus[mpos].posx-16,menus[mpos].posy+10,16,16,&rbuf);
-     tcopysprite(menus[mpos].posx-16,menus[mpos].posy+10,16,16,&menuptr);
+     grabregion(menus[mpos].posx-16,menus[mpos].posy+10,16,16,(char*)rbuf);
+     tcopysprite(menus[mpos].posx-16,menus[mpos].posy+10,16,16,(char*)menuptr);
      if (menus[mpos].linktype) {
-        if (!mpos) img=&buf1;
-        if (mpos==1) img=&buf2;
-        if (mpos==2) img=&buf3;
-        if (mpos==3) img=&buf4;
+        if (!mpos) img=(char*)buf1;
+        if (mpos==1) img=(char*)buf2;
+        if (mpos==2) img=(char*)buf3;
+        if (mpos==3) img=(char*)buf4;
         tcopysprite(menus[mpos].posx,menus[mpos].posy,16,32,img);
         tcopysprite(menus[mpos].posx+16,menus[mpos].posy,16,32,img+512);
         tcopysprite(menus[mpos].posx+32,menus[mpos].posy,16,32,img+1024);
@@ -193,27 +204,27 @@ inputloop:
      while (down) readcontrols(); }
 
   if (up) {
-     copysprite(menus[mpos].posx-16,menus[mpos].posy+10,16,16,&rbuf);
-     if (!mpos) img=&buf1;
-     if (mpos==1) img=&buf2;
-     if (mpos==2) img=&buf3;
-     if (mpos==3) img=&buf4;
+     copysprite(menus[mpos].posx-16,menus[mpos].posy+10,16,16,(char*)rbuf);
+     if (!mpos) img=(char*)buf1;
+     if (mpos==1) img=(char*)buf2;
+     if (mpos==2) img=(char*)buf3;
+     if (mpos==3) img=(char*)buf4;
      if (menus[mpos].linktype) {
-        greyscale(80,32,img,&tbuf);
-        tcopysprite(menus[mpos].posx,menus[mpos].posy,16,32,&tbuf);
-        tcopysprite(menus[mpos].posx+16,menus[mpos].posy,16,32,&tbuf[512]);
-        tcopysprite(menus[mpos].posx+32,menus[mpos].posy,16,32,&tbuf[1024]);
-        tcopysprite(menus[mpos].posx+48,menus[mpos].posy,16,32,&tbuf[1536]);
-        tcopysprite(menus[mpos].posx+64,menus[mpos].posy,16,32,&tbuf[2048]); }
+        greyscale(80,32,(unsigned char*)img,tbuf);
+        tcopysprite(menus[mpos].posx,menus[mpos].posy,16,32,(char*)tbuf);
+        tcopysprite(menus[mpos].posx+16,menus[mpos].posy,16,32,(char*)&tbuf[512]);
+        tcopysprite(menus[mpos].posx+32,menus[mpos].posy,16,32,(char*)&tbuf[1024]);
+        tcopysprite(menus[mpos].posx+48,menus[mpos].posy,16,32,(char*)&tbuf[1536]);
+        tcopysprite(menus[mpos].posx+64,menus[mpos].posy,16,32,(char*)&tbuf[2048]); }
      if (!mpos) mpos=3;
      else mpos--;
-     grabregion(menus[mpos].posx-16,menus[mpos].posy+10,16,16,&rbuf);
-     tcopysprite(menus[mpos].posx-16,menus[mpos].posy+10,16,16,&menuptr);
+     grabregion(menus[mpos].posx-16,menus[mpos].posy+10,16,16,(char*)rbuf);
+     tcopysprite(menus[mpos].posx-16,menus[mpos].posy+10,16,16,(char*)menuptr);
      if (menus[mpos].linktype) {
-        if (!mpos) img=&buf1;
-        if (mpos==1) img=&buf2;
-        if (mpos==2) img=&buf3;
-        if (mpos==3) img=&buf4;
+        if (!mpos) img=(char*)buf1;
+        if (mpos==1) img=(char*)buf2;
+        if (mpos==2) img=(char*)buf3;
+        if (mpos==3) img=(char*)buf4;
         tcopysprite(menus[mpos].posx,menus[mpos].posy,16,32,img);
         tcopysprite(menus[mpos].posx+16,menus[mpos].posy,16,32,img+512);
         tcopysprite(menus[mpos].posx+32,menus[mpos].posy,16,32,img+1024);
@@ -237,7 +248,7 @@ inputloop:
   fout(); timer_count=0;
 }
 
-RemoveItem(char c, char i)
+void RemoveItem(char c, char i)
 { char j;
 
   for (j=i; j<pstats[c].invcnt; j++)
@@ -245,16 +256,16 @@ RemoveItem(char c, char i)
   pstats[c].invcnt--;
 }
 
-DrawItemMenu(char c,char ptr)
+void DrawItemMenu(char c,char ptr)
 { unsigned char l,i,a,*img,z;
   int j,k;
 
   l=partyidx[c]-1;
   drawmap();
-  tcopysprite(20,20,96,96,chr2+(c*9216));   // Status portrait
+  tcopysprite(20,20,96,96,(char*)chr2+(c*9216));   // Status portrait
 
   tmenubox(120,20,224,38);                  // name box
-  i=strlen(pstats[l].name)*4;
+  i=strlen((const char*)pstats[l].name)*4;
   gotoxy(172-i,26);
   printstring(pstats[l].name);
   tmenubox(226,20,330,38);
@@ -263,17 +274,17 @@ DrawItemMenu(char c,char ptr)
   tmenubox(120,40,330,59);                 // Item name
   a=pstats[l].inv[ptr];
   if (!items[a].useflag || items[a].useflag>=3) fontcolor(17);
-  j=strlen(items[a].name);
+  j=strlen((const char*)items[a].name);
   gotoxy(225-(j*4),46);
   if (ptr<pstats[l].invcnt)
-     printstring(items[a].name);
+     printstring((char*)items[a].name);
   fontcolor(31);
 
   tmenubox(120,61,330,80);                 // Item desc
-  j=strlen(items[a].desc);
+  j=strlen((const char*)items[a].desc);
   gotoxy(225-(j*4),67);
   if (ptr<pstats[l].invcnt)
-     printstring(items[a].desc);
+     printstring((char*)items[a].desc);
 
   if (items[a].equipflag && !iuflag)           // Show who it's equipable by
   {
@@ -298,7 +309,7 @@ DrawItemMenu(char c,char ptr)
   {
       a=pstats[l].inv[j];
       img=itemicons+(items[a].icon*256);
-      tcopysprite(137+(j*32),91,16,16,img);
+      tcopysprite(137+(j*32),91,16,16,(char*)img);
   }
 
   tmenubox(120,117,330,210);
@@ -307,14 +318,14 @@ DrawItemMenu(char c,char ptr)
       {
            a=pstats[l].inv[((k+1)*6)+j];
            img=itemicons+(items[a].icon*256);
-           tcopysprite(137+(j*32),130+(k*24),16,16,img);
+           tcopysprite(137+(j*32),130+(k*24),16,16,(char*)img);
       }
   a=ptr/6;
-  if (ptr<6) tcopysprite(133+(ptr*32),87,24,24,&itmptr);
-  else tcopysprite(133+((ptr-(a*6))*32),102+(a*24),24,24,&itmptr);
+  if (ptr<6) tcopysprite(133+(ptr*32),87,24,24,(char*)itmptr);
+  else tcopysprite(133+((ptr-(a*6))*32),102+(a*24),24,24,(char*)itmptr);
 }
 
-ItemGive(char c, char p)
+void ItemGive(char c, char p)
 { int first=1, ptr=0,i,j;
   unsigned char l,t1;
 
@@ -330,7 +341,7 @@ drawloop:
         printstring(pstats[l].name);
       }
 
-  tcopysprite(27,131+(ptr*10),16,16,&menuptr);
+  tcopysprite(27,131+(ptr*10),16,16,(char*)menuptr);
   vgadump();
 
   readcontrols();
@@ -367,7 +378,7 @@ drawloop:
   while (b4 || b2) { first=2; goto drawloop; }
 }
 
-ItemUse(char c, char p)
+void ItemUse(char c, char p)
 { int first=1, ptr=0,i,j;
   unsigned char l,t1,a;
 
@@ -392,7 +403,7 @@ drawloop:
         printstring(pstats[l].name);
       }
 
-  tcopysprite(27,131+(ptr*10),16,16,&menuptr);
+  tcopysprite(27,131+(ptr*10),16,16,(char*)menuptr);
   vgadump();
 
   readcontrols();
@@ -427,7 +438,7 @@ usesec:
   RemoveItem(c,p);
 }
 
-ItemActionSelect(char c,char p)
+void ItemActionSelect(char c,char p)
 { int first=1, ptr=0,i;
   unsigned char l, a;
 
@@ -440,7 +451,7 @@ drawloop:
   gotoxy(45,123); printstring("Use");
   gotoxy(45,133); printstring("Give");
   gotoxy(45,143); printstring("Drop");
-  tcopysprite(26,121+(ptr*10),16,16,&menuptr);
+  tcopysprite(26,121+(ptr*10),16,16,(char*)menuptr);
   vgadump();
 
   readcontrols();
@@ -485,7 +496,7 @@ drawloop:
   while (b4 || b2) { first=2; goto drawloop; }
 }
 
-ItemMenu(char c)
+void ItemMenu(char c)
 { int first=1;
   unsigned char l,ptr=6,mx=0,my=1;
 
@@ -530,9 +541,9 @@ drawloop:
   while (b4 || b2) { first=2; goto drawloop; }
 }
 
-int atkp,defp,magp,mgrp,hitp,dodp,mblp,ferp,reap;
+// int atkp,defp,magp,mgrp,hitp,dodp,mblp,ferp,reap;
 
-CalcEquipPreview(int a,int i,int p)
+void CalcEquipPreview(int a,int i,int p)
 { int c,d;
 
   d=items[pstats[a].inv[p]].equipflag-1;
@@ -568,16 +579,16 @@ CalcEquipPreview(int a,int i,int p)
   UpdateEquipStats();
 }
 
-DrawEquipMenu(char c,char ptr)
+void DrawEquipMenu(char c,char ptr)
 { unsigned char l,i,a,*img;
   int j,k;
 
   l=partyidx[c]-1;
   drawmap();
-  tcopysprite(20,20,96,96,chr2+(c*9216));   // Status portrait
+  tcopysprite(20,20,96,96,(char*)chr2+(c*9216));   // Status portrait
 
   tmenubox(120,20,224,38);                  // name box
-  i=strlen(pstats[l].name)*4;
+  i=strlen((const char*)pstats[l].name)*4;
   gotoxy(172-i,26);
   printstring(pstats[l].name);
   tmenubox(226,20,330,38);
@@ -587,17 +598,17 @@ DrawEquipMenu(char c,char ptr)
   a=pstats[l].inv[ptr];
   if (!items[a].equipflag || !equip[items[a].equipidx].equipable[l])
      fontcolor(17);
-  j=strlen(items[a].name);
+  j=strlen((const char*)items[a].name);
   gotoxy(225-(j*4),46);
   if (ptr<pstats[l].invcnt)
-     printstring(items[a].name);
+     printstring((char*)items[a].name);
   fontcolor(31);
 
   tmenubox(120,61,330,80);                 // Item desc
-  j=strlen(items[a].desc);
+  j=strlen((const char*)items[a].desc);
   gotoxy(225-(j*4),67);
   if (ptr<pstats[l].invcnt)
-     printstring(items[a].desc);
+     printstring((char*)items[a].desc);
 
   // If equipment, do effect preview box
 
@@ -605,24 +616,24 @@ DrawEquipMenu(char c,char ptr)
   {
      tmenubox(20,117,115,210);
      gotoxy(26,124);
-     printstring("ATK "); dec_to_asciiz(pstats[l].atk,strbuf); gotoxy(80-(strlen(strbuf)*8),124); printstring(strbuf); printstring(">");dec_to_asciiz(atkp,strbuf);
-     if (pstats[l].atk<atkp) fontcolor(97); if (atkp<pstats[l].atk) fontcolor(36); gotoxy(110-(strlen(strbuf)*8),124); printstring(strbuf); fontcolor(31); gotoxy(26,133);
-     printstring("DEF "); dec_to_asciiz(pstats[l].def,strbuf); gotoxy(80-(strlen(strbuf)*8),133); printstring(strbuf); printstring(">");dec_to_asciiz(defp,strbuf);
-     if (pstats[l].def<defp) fontcolor(97); if (defp<pstats[l].def) fontcolor(36); gotoxy(110-(strlen(strbuf)*8),133); printstring(strbuf); fontcolor(31);gotoxy(26,142);
-     printstring("HIT "); dec_to_asciiz(pstats[l].hitc,strbuf); gotoxy(80-(strlen(strbuf)*8),142); printstring(strbuf); printstring(">");dec_to_asciiz(hitp,strbuf);
-     if (pstats[l].hitc<hitp) fontcolor(97); if (hitp<pstats[l].hitc) fontcolor(36); gotoxy(110-(strlen(strbuf)*8),142); printstring(strbuf); fontcolor(31);gotoxy(26,151);
-     printstring("DOD "); dec_to_asciiz(pstats[l].dodc,strbuf); gotoxy(80-(strlen(strbuf)*8),151); printstring(strbuf); printstring(">");dec_to_asciiz(dodp,strbuf);
-     if (pstats[l].dodc<dodp) fontcolor(97); if (dodp<pstats[l].dodc) fontcolor(36); gotoxy(110-(strlen(strbuf)*8),151); printstring(strbuf); fontcolor(31);gotoxy(26,160);
-     printstring("MAG "); dec_to_asciiz(pstats[l].magc,strbuf); gotoxy(80-(strlen(strbuf)*8),160); printstring(strbuf); printstring(">");dec_to_asciiz(magp,strbuf);
-     if (pstats[l].magc<magp) fontcolor(97); if (magp<pstats[l].magc) fontcolor(36); gotoxy(110-(strlen(strbuf)*8),160); printstring(strbuf); fontcolor(31);gotoxy(26,169);
-     printstring("MGR "); dec_to_asciiz(pstats[l].mgrc,strbuf); gotoxy(80-(strlen(strbuf)*8),169); printstring(strbuf); printstring(">");dec_to_asciiz(mgrp,strbuf);
-     if (pstats[l].mgrc<mgrp) fontcolor(97); if (mgrp<pstats[l].mgrc) fontcolor(36); gotoxy(110-(strlen(strbuf)*8),169); printstring(strbuf); fontcolor(31);gotoxy(26,178);
-     printstring("REA "); dec_to_asciiz(pstats[l].reac,strbuf); gotoxy(80-(strlen(strbuf)*8),178); printstring(strbuf); printstring(">"); dec_to_asciiz(reap,strbuf);
-     if (pstats[l].reac<reap) fontcolor(97); if (reap<pstats[l].reac) fontcolor(36); gotoxy(110-(strlen(strbuf)*8),178); printstring(strbuf); fontcolor(31);gotoxy(26,187);
-     printstring("FER "); dec_to_asciiz(pstats[l].ferc,strbuf); gotoxy(80-(strlen(strbuf)*8),187); printstring(strbuf); printstring(">");dec_to_asciiz(ferp,strbuf);
-     if (pstats[l].ferc<ferp) fontcolor(97); if (ferp<pstats[l].ferc) fontcolor(36); gotoxy(110-(strlen(strbuf)*8),187); printstring(strbuf); fontcolor(31);gotoxy(26,196);
-     printstring("MBL "); dec_to_asciiz(pstats[l].mblc,strbuf); gotoxy(80-(strlen(strbuf)*8),196); printstring(strbuf); printstring(">");dec_to_asciiz(mblp,strbuf);
-     if (pstats[l].mblc<mblp) fontcolor(97); if (mblp<pstats[l].mblc) fontcolor(36); gotoxy(110-(strlen(strbuf)*8),196); printstring(strbuf); fontcolor(31);
+     printstring((char*)"ATK "); dec_to_asciiz(pstats[l].atk,(char*)strbuf); gotoxy(80-(strlen((const char*)strbuf)*8),124); printstring((char*)strbuf); printstring((char*)">");dec_to_asciiz(atkp,(char*)strbuf);
+     if (pstats[l].atk<atkp) fontcolor(97); if (atkp<pstats[l].atk) fontcolor(36); gotoxy(110-(strlen((const char*)strbuf)*8),124); printstring((char*)strbuf); fontcolor(31); gotoxy(26,133);
+     printstring((char*)"DEF "); dec_to_asciiz(pstats[l].def,(char*)strbuf); gotoxy(80-(strlen((const char*)strbuf)*8),133); printstring((char*)strbuf); printstring((char*)">");dec_to_asciiz(defp,(char*)strbuf);
+     if (pstats[l].def<defp) fontcolor(97); if (defp<pstats[l].def) fontcolor(36); gotoxy(110-(strlen((const char*)strbuf)*8),133); printstring((char*)strbuf); fontcolor(31);gotoxy(26,142);
+     printstring((char*)"HIT "); dec_to_asciiz(pstats[l].hitc,(char*)strbuf); gotoxy(80-(strlen((const char*)strbuf)*8),142); printstring((char*)strbuf); printstring((char*)">");dec_to_asciiz(hitp,(char*)strbuf);
+     if (pstats[l].hitc<hitp) fontcolor(97); if (hitp<pstats[l].hitc) fontcolor(36); gotoxy(110-(strlen((const char*)strbuf)*8),142); printstring((char*)strbuf); fontcolor(31);gotoxy(26,151);
+     printstring((char*)"DOD "); dec_to_asciiz(pstats[l].dodc,(char*)strbuf); gotoxy(80-(strlen((const char*)strbuf)*8),151); printstring((char*)strbuf); printstring((char*)">");dec_to_asciiz(dodp,(char*)strbuf);
+     if (pstats[l].dodc<dodp) fontcolor(97); if (dodp<pstats[l].dodc) fontcolor(36); gotoxy(110-(strlen((const char*)strbuf)*8),151); printstring((char*)strbuf); fontcolor(31);gotoxy(26,160);
+     printstring((char*)"MAG "); dec_to_asciiz(pstats[l].magc,(char*)strbuf); gotoxy(80-(strlen((const char*)strbuf)*8),160); printstring((char*)strbuf); printstring((char*)">");dec_to_asciiz(magp,(char*)strbuf);
+     if (pstats[l].magc<magp) fontcolor(97); if (magp<pstats[l].magc) fontcolor(36); gotoxy(110-(strlen((const char*)strbuf)*8),160); printstring((char*)strbuf); fontcolor(31);gotoxy(26,169);
+     printstring((char*)"MGR "); dec_to_asciiz(pstats[l].mgrc,(char*)strbuf); gotoxy(80-(strlen((const char*)strbuf)*8),169); printstring((char*)strbuf); printstring((char*)">");dec_to_asciiz(mgrp,(char*)strbuf);
+     if (pstats[l].mgrc<mgrp) fontcolor(97); if (mgrp<pstats[l].mgrc) fontcolor(36); gotoxy(110-(strlen((const char*)strbuf)*8),169); printstring((char*)strbuf); fontcolor(31);gotoxy(26,178);
+     printstring((char*)"REA "); dec_to_asciiz(pstats[l].reac,(char*)strbuf); gotoxy(80-(strlen((const char*)strbuf)*8),178); printstring((char*)strbuf); printstring((char*)">"); dec_to_asciiz(reap,(char*)strbuf);
+     if (pstats[l].reac<reap) fontcolor(97); if (reap<pstats[l].reac) fontcolor(36); gotoxy(110-(strlen((const char*)strbuf)*8),178); printstring((char*)strbuf); fontcolor(31);gotoxy(26,187);
+     printstring((char*)"FER "); dec_to_asciiz(pstats[l].ferc,(char*)strbuf); gotoxy(80-(strlen((const char*)strbuf)*8),187); printstring((char*)strbuf); printstring((char*)">");dec_to_asciiz(ferp,(char*)strbuf);
+     if (pstats[l].ferc<ferp) fontcolor(97); if (ferp<pstats[l].ferc) fontcolor(36); gotoxy(110-(strlen((const char*)strbuf)*8),187); printstring((char*)strbuf); fontcolor(31);gotoxy(26,196);
+     printstring((char*)"MBL "); dec_to_asciiz(pstats[l].mblc,(char*)strbuf); gotoxy(80-(strlen((const char*)strbuf)*8),196); printstring((char*)strbuf); printstring((char*)">");dec_to_asciiz(mblp,(char*)strbuf);
+     if (pstats[l].mblc<mblp) fontcolor(97); if (mblp<pstats[l].mblc) fontcolor(36); gotoxy(110-(strlen((const char*)strbuf)*8),196); printstring((char*)strbuf); fontcolor(31);
   }
 
   tmenubox(120,82,330,115);
@@ -631,7 +642,7 @@ DrawEquipMenu(char c,char ptr)
   {
       a=pstats[l].inv[j];
       img=itemicons+(items[a].icon*256);
-      tcopysprite(137+(j*32),91,16,16,img);
+      tcopysprite(137+(j*32),91,16,16,(char*)img);
   }
 
   tmenubox(120,117,330,210);
@@ -641,16 +652,16 @@ DrawEquipMenu(char c,char ptr)
            a=pstats[l].inv[((k+1)*6)+j];
            img=itemicons+(items[a].icon*256);
            if (!items[a].equipflag || !equip[items[a].equipidx].equipable[l])
-              { greyscale(16,16,img,&gsimg);
-                img=&gsimg; }
-           tcopysprite(137+(j*32),130+(k*24),16,16,img);
+              { greyscale(16,16,img,gsimg);
+                img=gsimg; }
+           tcopysprite(137+(j*32),130+(k*24),16,16,(char*)img);
       }
   a=ptr/6;
-  if (ptr<6) tcopysprite(133+(ptr*32),87,24,24,&itmptr);
-  else tcopysprite(133+((ptr-(a*6))*32),102+(a*24),24,24,&itmptr);
+  if (ptr<6) tcopysprite(133+(ptr*32),87,24,24,(char*)itmptr);
+  else tcopysprite(133+((ptr-(a*6))*32),102+(a*24),24,24,(char*)itmptr);
 }
 
-Equip(char c,char ptr)
+void Equip(char c,char ptr)
 { unsigned char a,l,b;
 
   l=partyidx[c]-1;
@@ -674,7 +685,7 @@ Equip(char c,char ptr)
       ExecuteEffect(equip[items[a].equipidx].onequip-1);
 }
 
-DeEquip(char c,char ptr)
+void DeEquip(char c,char ptr)
 { unsigned char a,l,b;
 
   l=partyidx[c]-1;
@@ -695,7 +706,7 @@ DeEquip(char c,char ptr)
       ExecuteEffect(equip[items[a].equipidx].ondeequip-1);
 }
 
-EquipMenu(char c)
+void EquipMenu(char c)
 { int first=1,a;
   unsigned char l,ptr=6,mx=0,my=1;
 
@@ -758,48 +769,48 @@ drawloop:
 
 // Magic Menu? NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW
 
-DrawMagicMenu(char c,char ptr)
+void DrawMagicMenu(char c,char ptr)
 { unsigned char l,i,a,*img,z;
   int j,k;
 
   l=partyidx[c]-1;
   drawmap();
-  tcopysprite(20,20,96,96,chr2+(c*9216));   // Status portrait
+  tcopysprite(20,20,96,96,(char*)chr2+(c*9216));   // Status portrait
 
   tmenubox(120,20,224,38);                  // name box
-  i=strlen(pstats[l].name)*4;
+  i=strlen((const char*)pstats[l].name)*4;
   gotoxy(172-i,26);
-  printstring(pstats[l].name);
+  printstring((char*)pstats[l].name);
   tmenubox(226,20,330,38);
-  gotoxy(262,26); printstring("MAGIC");
+  gotoxy(262,26); printstring((char*)"MAGIC");
 
   tmenubox(120,40,330,59);                 // Item name
   a=pstats[l].maginv[ptr];
   if (!magic[a].useflag || magic[a].useflag>=3) fontcolor(17);
-  j=strlen(magic[a].name);
+  j=strlen((const char*)magic[a].name);
   gotoxy(225-(j*4),46);
   if (ptr<pstats[l].magcnt)
-     printstring(magic[a].name);
+     printstring((char*)magic[a].name);
   fontcolor(31);
 
   tmenubox(120,61,330,80);                 // Item desc
-  j=strlen(magic[a].desc);
+  j=strlen((const char*)magic[a].desc);
   gotoxy(225-(j*4),67);
   if (ptr<pstats[l].magcnt)
-     printstring(magic[a].desc);
+     printstring((char*)magic[a].desc);
 
   if (magic[a].equipflag && !iuflag)           // Show who it's equipable by
   {
      tmenubox(20,117,115,186);
      gotoxy(27,123);
-     printstring("Use:"); z=0;
+     printstring((char*)"Use:"); z=0;
      for (j=0; j<5; j++)
      {
         i=partyidx[j]-1;
         if (equip[magic[a].equipidx].equipable[i] && j < numchars)
         {
            gotoxy(33,133+(z*10));
-           printstring(pstats[i].name);
+           printstring((char*)pstats[i].name);
            z++;
         }
      }
@@ -813,7 +824,7 @@ DrawMagicMenu(char c,char ptr)
   {
       a=pstats[l].maginv[j];
       img=magicicons+(magic[a].icon*256);
-      tcopysprite(137+(j*32),102,16,16,img);
+      tcopysprite(137+(j*32),102,16,16,(char*)img);
   }
 
   for (k=0; k<3; k++)
@@ -821,16 +832,16 @@ DrawMagicMenu(char c,char ptr)
       {
            a=pstats[l].maginv[((k+1)*6)+j];
            img=magicicons+(magic[a].icon*256);
-           tcopysprite(137+(j*32),130+(k*24),16,16,img);
+           tcopysprite(137+(j*32),130+(k*24),16,16,(char*)img);
       }
   a=ptr/6;
-  if (ptr<6) tcopysprite(133+(ptr*32),98,24,24,&itmptr);
-  else tcopysprite(133+((ptr-(a*6))*32),102+(a*24),24,24,&itmptr);
+  if (ptr<6) tcopysprite(133+(ptr*32),98,24,24,(char*)itmptr);
+  else tcopysprite(133+((ptr-(a*6))*32),102+(a*24),24,24,(char*)itmptr);
 }
-                            
 
 
-MagicUse(char c, char p)
+
+void MagicUse(char c, char p)
 { int first=1, ptr=0,i,j;
   unsigned char l,t1,a;
   int timer_count, an;
@@ -848,15 +859,15 @@ MagicUse(char c, char p)
 drawloop:
   DrawMagicMenu(c,p);
   tmenubox(20,117,115,139+(numchars*10));
-  gotoxy(30,123); printstring("Cast on:");
+  gotoxy(30,123); printstring((char*)"Cast on:");
 
   for (j=0; j<numchars; j++)
       { l=partyidx[j]-1;
         gotoxy(45,133+(j*10));
-        printstring(pstats[l].name);
+        printstring((char*)pstats[l].name);
       }
 
-  tcopysprite(27,131+(ptr*10),16,16,&menuptr);
+  tcopysprite(27,131+(ptr*10),16,16,(char*)menuptr);
   vgadump();
 
   readcontrols();
@@ -903,7 +914,7 @@ drawloop2:
   drawmap();
   tmenubox(120,90,240,110);
   gotoxy(130,96);
-  printstring("Not Enough MP");  
+  printstring((char*)"Not Enough MP");
   vgadump();
   readcontrols();
 
@@ -924,7 +935,7 @@ drawloop2:
   // RemoveItem(c,p);
 }
 
-MagicActionSelect(char c,char p)
+void MagicActionSelect(char c,char p)
 { int first=1, ptr=0,i;
   unsigned char l, a;
   int t1;
@@ -941,10 +952,10 @@ drawloop:
   tmenubox(20, 161, 115, 181);
   gotoxy(45,167);
   t1 = pstats[l].maginv[p];
-  dec_to_asciiz(magic[t1].price,strbuf);
-  printstring(strbuf);
+  dec_to_asciiz(magic[t1].price,(char*)strbuf);
+  printstring((char*)strbuf);
 
-  tcopysprite(26,121+(ptr*10),16,16,&menuptr);
+  tcopysprite(26,121+(ptr*10),16,16,(char*)menuptr);
   vgadump();
 
   readcontrols();
@@ -991,7 +1002,7 @@ drawloop:
   while (b4 || b2) { first=2; goto drawloop; }
 }
 
-MagicMenu(char c)
+void MagicMenu(char c)
 { int first=1;
   unsigned char l,ptr=0,mx=0,my=0;
 

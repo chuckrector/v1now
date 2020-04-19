@@ -3,8 +3,9 @@
 
 // This source code REALLY needs to be cleaned up. A lot.
 
-#include <dpmi.h>
-#include <sys\nearptr.h>
+// #include <dpmi.h>
+// #include <sys\nearptr.h>
+// #include <math.h> // abs
 #include <stdio.h>
 #include <strings.h>
 #include "control.h"
@@ -12,112 +13,120 @@
 #include "timer.h"
 
 #include "engine.h" // for valloc()
+#include "vga.h"
 
+extern void err(char* ermsg);
+
+int abs(int x) {
+  if (x<0) return -x;
+  return x;
+}
 unsigned char pal[768];
 unsigned char pal2[768];
 extern char waitvrt,*speech,fade,cancelfade,*strbuf;
 
-char *fnt,*fnt2,*tbox,*n;
+char *fnt,*fnt2,*tbox,*n_vga;
 short int x1=17,y1=17;
 
-__dpmi_regs regs;
+// __dpmi_regs regs;
 unsigned char *screen;
 unsigned char *virscr;
 
-wait()
+void wait()
 {
-  while (inportb(0x3DA) & 8) {}
-  while (!(inportb(0x3DA) & 8)) {}
+  // while (inportb(0x3DA) & 8) {}
+  // while (!(inportb(0x3DA) & 8)) {}
 }
 
-set_palette(unsigned char *pall)
+void set_palette(unsigned char *pall)
 { unsigned int i;
 
   if (waitvrt) wait();
-  outportb(0x03c8, 0);
-  for (i=0; i<768; i++)
-      outportb(0x03c9, pall[i]);
+  // outportb(0x03c8, 0);
+  // for (i=0; i<768; i++)
+  //     outportb(0x03c9, pall[i]);
 }
 
-get_palette()
+void get_palette()
 { unsigned int i;
 
-  outportb(0x03c7, 0);
-  for (i=0; i<768; i++)
-      pal[i]=inportb(0x03c9);
+  // outportb(0x03c7, 0);
+  // for (i=0; i<768; i++)
+  //     pal[i]=inportb(0x03c9);
 }
 
-set_intensity(unsigned int n)
+void set_intensity(unsigned int n)
   { int i;
     for (i=767; i>=0; --i)
       pal2[i] = (pal[i] * n) >> 6;
     set_palette(pal2);
   }
 
-initvga()
-{ memset(&regs, 0, sizeof regs);
-  regs.x.ax=0x13;
+void PreCalc_TransparencyFields();
+void initvga()
+{ //memset(&regs, 0, sizeof regs);
+  // regs.x.ax=0x13;
 
   PreCalc_TransparencyFields();
 
-  __dpmi_int(0x10, &regs);
-  virscr=valloc(90000,"virscr");
-  n=valloc(256,"initvga:n");
+  // __dpmi_int(0x10, &regs);
+  virscr=(unsigned char*)valloc(90000,"virscr");
+  n_vga=(char*)valloc(256,"initvga:n_vga");
   //memset(virscr, 0, 81664);
   //memset(n, 0, 256);
-  __djgpp_nearptr_enable();
-  screen=0xa0000 + __djgpp_conventional_base;
+  // __djgpp_nearptr_enable();
+  // screen=0xa0000 + __djgpp_conventional_base;
 }
 
-closevga()
-{ __djgpp_nearptr_disable();
-  regs.x.ax = 0x0003;
-  __dpmi_int(0x10, &regs);
+void closevga()
+{ //__djgpp_nearptr_disable();
+  // regs.x.ax = 0x0003;
+  // __dpmi_int(0x10, &regs);
 }
 
-quick_killgfx()
-{ regs.x.ax=0x03;
-  __dpmi_int(0x10, &regs);
+void quick_killgfx()
+{ //regs.x.ax=0x03;
+  // __dpmi_int(0x10, &regs);
 }
 
-quick_restoregfx()
-{ regs.x.ax=0x013;
-  __dpmi_int(0x10, &regs);
+void quick_restoregfx()
+{ //regs.x.ax=0x013;
+  // __dpmi_int(0x10, &regs);
 }
 
-vgadump()
+void vgadump()
 {
   if (waitvrt) wait();
-  asm("movl _virscr, %%esi              \n\t"
-      "addl $5648, %%esi                \n\t"
-      "movl _screen, %%edi              \n\t"
-      "movl $200, %%eax                 \n\t"
-"lineloop:                              \n\t"
-      "movl $80, %%ecx                  \n\t"
-      "rep                              \n\t"
-      "movsl                            \n\t"
-      "addl $32, %%esi                  \n\t"
-      "decl %%eax                       \n\t"
-      "jnz lineloop                     \n\t"
-      :
-      :
-      : "esi", "edi", "cc", "eax", "ecx");
+//   asm("movl _virscr, %%esi              \n\t"
+//       "addl $5648, %%esi                \n\t"
+//       "movl _screen, %%edi              \n\t"
+//       "movl $200, %%eax                 \n\t"
+// "lineloop:                              \n\t"
+//       "movl $80, %%ecx                  \n\t"
+//       "rep                              \n\t"
+//       "movsl                            \n\t"
+//       "addl $32, %%esi                  \n\t"
+//       "decl %%eax                       \n\t"
+//       "jnz lineloop                     \n\t"
+//       :
+//       :
+//       : "esi", "edi", "cc", "eax", "ecx");
 }
 
-setpixel(int x, int y, char c)
-{  asm ("movl %1, %%eax                 \n\t"
-        "imul $352, %%eax               \n\t"
-        "addl %0, %%eax                 \n\t"
-        "addl _virscr, %%eax            \n\t"
-        "movl %%eax, %%edi              \n\t"
-        "movb %2, %%al                  \n\t"
-        "stosb                          \n\t"
-        :
-        :"m" (x), "m" (y), "m" (c)
-        : "eax","edi","cc" );
+void setpixel(int x, int y, char c)
+{  //asm ("movl %1, %%eax                 \n\t"
+        // "imul $352, %%eax               \n\t"
+        // "addl %0, %%eax                 \n\t"
+        // "addl _virscr, %%eax            \n\t"
+        // "movl %%eax, %%edi              \n\t"
+        // "movb %2, %%al                  \n\t"
+        // "stosb                          \n\t"
+        // :
+        // :"m" (x), "m" (y), "m" (c)
+        // : "eax","edi","cc" );
 }
 
-vline(int x, int y, int y2, char c)
+void vline(int x, int y, int y2, char c)
 { int i;
 
   for (i=0; i<(y2-y); i++)
@@ -125,23 +134,23 @@ vline(int x, int y, int y2, char c)
 
 }
 
-hline(int x, int y, int x2, char c)
-{  asm ("movl %2, %%ecx                 \n\t"
-        "subl %0, %%ecx                 \n\t"
-        "movl %1, %%eax                 \n\t"
-        "imul $352, %%eax               \n\t"
-        "addl %0, %%eax                 \n\t"
-        "addl _virscr, %%eax            \n\t"
-        "movl %%eax, %%edi              \n\t"
-        "movb %3, %%al                  \n\t"
-        "repz                           \n\t"
-        "stosb                          \n\t"
-        :
-        : "m" (x), "m" (y), "m" (x2), "m" (c)
-        : "eax","edi","ecx","cc" );
+void hline(int x, int y, int x2, char c)
+{  //asm ("movl %2, %%ecx                 \n\t"
+        // "subl %0, %%ecx                 \n\t"
+        // "movl %1, %%eax                 \n\t"
+        // "imul $352, %%eax               \n\t"
+        // "addl %0, %%eax                 \n\t"
+        // "addl _virscr, %%eax            \n\t"
+        // "movl %%eax, %%edi              \n\t"
+        // "movb %3, %%al                  \n\t"
+        // "repz                           \n\t"
+        // "stosb                          \n\t"
+        // :
+        // : "m" (x), "m" (y), "m" (x2), "m" (c)
+        // : "eax","edi","ecx","cc" );
 }
 
-box(int x, int y, int x2, int y2, char color)
+void box(int x, int y, int x2, int y2, char color)
 { int i;
 
   if (x2<x) { i=x2; x2=x; x=i; }
@@ -173,156 +182,156 @@ copytile(int x, int y, char *spr)
 }
 */
 
-copytile(int x, int y, char *spr)
+void copytile(int x, int y, char *spr)
 {
-  asm("movl $16, %%ecx                  \n\t"
-      "movl %2, %%esi                   \n\t"
-      "movl %1, %%edi                   \n\t"
-      "imul $352, %%edi                 \n\t"
-      "addl %0, %%edi                   \n\t"
-      "addl _virscr, %%edi              \n\t"
-" ctl0:                                 \n\t"
-      "movl (%%edi), %%eax              \n\t"
-      "andl $0, %%eax                   \n\t"
-      "orl  (%%esi), %%eax              \n\t"
-      "movl %%eax, (%%edi)              \n\t"
-      "movl 4(%%edi), %%eax             \n\t"
-      "andl $0, %%eax                   \n\t"
-      "orl  4(%%esi), %%eax             \n\t"
-      "movl %%eax, 4(%%edi)             \n\t"
-      "movl 8(%%edi), %%eax             \n\t"
-      "andl $0, %%eax                   \n\t"
-      "orl  8(%%esi), %%eax             \n\t"
-      "movl %%eax, 8(%%edi)             \n\t"
-      "movl 12(%%edi), %%eax            \n\t"
-      "andl $0, %%eax                   \n\t"
-      "orl  12(%%esi), %%eax            \n\t"
-      "movl %%eax, 12(%%edi)            \n\t"
-      "addl $16, %%esi                  \n\t"
-      "addl $352, %%edi                 \n\t"
-      "decl %%ecx                       \n\t"
-      "jnz ctl0                         \n\t"
-      :
-      : "m" (x), "m" (y), "m" (spr)
-      : "eax","ecx","esi","edi","cc" );
+//   asm("movl $16, %%ecx                  \n\t"
+//       "movl %2, %%esi                   \n\t"
+//       "movl %1, %%edi                   \n\t"
+//       "imul $352, %%edi                 \n\t"
+//       "addl %0, %%edi                   \n\t"
+//       "addl _virscr, %%edi              \n\t"
+// " ctl0:                                 \n\t"
+//       "movl (%%edi), %%eax              \n\t"
+//       "andl $0, %%eax                   \n\t"
+//       "orl  (%%esi), %%eax              \n\t"
+//       "movl %%eax, (%%edi)              \n\t"
+//       "movl 4(%%edi), %%eax             \n\t"
+//       "andl $0, %%eax                   \n\t"
+//       "orl  4(%%esi), %%eax             \n\t"
+//       "movl %%eax, 4(%%edi)             \n\t"
+//       "movl 8(%%edi), %%eax             \n\t"
+//       "andl $0, %%eax                   \n\t"
+//       "orl  8(%%esi), %%eax             \n\t"
+//       "movl %%eax, 8(%%edi)             \n\t"
+//       "movl 12(%%edi), %%eax            \n\t"
+//       "andl $0, %%eax                   \n\t"
+//       "orl  12(%%esi), %%eax            \n\t"
+//       "movl %%eax, 12(%%edi)            \n\t"
+//       "addl $16, %%esi                  \n\t"
+//       "addl $352, %%edi                 \n\t"
+//       "decl %%ecx                       \n\t"
+//       "jnz ctl0                         \n\t"
+//       :
+//       : "m" (x), "m" (y), "m" (spr)
+//       : "eax","ecx","esi","edi","cc" );
 }
 
-copysprite(int x, int y, int width, int height, char *spr)
-{ asm("movl %3, %%edx                   \n\t"
-      "movl %4, %%esi                   \n\t"
-"csl0:                                  \n\t"
-      "movl %1, %%eax                   \n\t"
-      "imul $352, %%eax                 \n\t"
-      "addl %0, %%eax                   \n\t"
-      "addl _virscr, %%eax              \n\t"
-      "movl %%eax, %%edi                \n\t"
-      "movl %2, %%ecx                   \n\t"
-      "shrl $1, %%ecx                   \n\t"
-      "jnc csl1                         \n\t"
-      "movsb                            \n\t"
-"csl1:                                  \n\t"
-      "repz                             \n\t"
-      "movsw                            \n\t"
-      "incl %1                          \n\t"
-      "decl %%edx                       \n\t"
-      "jnz csl0                         \n\t"
-      :
-      : "m" (x), "m" (y), "m" (width), "m" (height), "m" (spr)
-      : "eax","edx","esi","edi","ecx","cc" );
+void copysprite(int x, int y, int width, int height, char *spr)
+{ //asm("movl %3, %%edx                   \n\t"
+//       "movl %4, %%esi                   \n\t"
+// "csl0:                                  \n\t"
+//       "movl %1, %%eax                   \n\t"
+//       "imul $352, %%eax                 \n\t"
+//       "addl %0, %%eax                   \n\t"
+//       "addl _virscr, %%eax              \n\t"
+//       "movl %%eax, %%edi                \n\t"
+//       "movl %2, %%ecx                   \n\t"
+//       "shrl $1, %%ecx                   \n\t"
+//       "jnc csl1                         \n\t"
+//       "movsb                            \n\t"
+// "csl1:                                  \n\t"
+//       "repz                             \n\t"
+//       "movsw                            \n\t"
+//       "incl %1                          \n\t"
+//       "decl %%edx                       \n\t"
+//       "jnz csl0                         \n\t"
+//       :
+//       : "m" (x), "m" (y), "m" (width), "m" (height), "m" (spr)
+//       : "eax","edx","esi","edi","ecx","cc" );
 }
 
-grabregion(int x, int y, int width, int height, char *spr)
-{ asm("movl %3, %%edx                   \n\t"
-      "movl %4, %%edi                   \n\t"
-"grl0:                                  \n\t"
-      "movl %1, %%eax                   \n\t"
-      "imul $352, %%eax                 \n\t"
-      "addl %0, %%eax                   \n\t"
-      "addl _virscr, %%eax              \n\t"
-      "movl %%eax, %%esi                \n\t"
-      "movl %2, %%ecx                   \n\t"
-      "shrl $1, %%ecx                   \n\t"
-      "jnc grl1                         \n\t"
-      "movsb                            \n\t"
-"grl1:                                  \n\t"
-      "repz                             \n\t"
-      "movsw                            \n\t"
-      "incl %1                          \n\t"
-      "decl %%edx                       \n\t"
-      "jnz grl0                         \n\t"
-      :
-      : "m" (x), "m" (y), "m" (width), "m" (height), "m" (spr)
-      : "eax","edx","esi","edi","ecx","cc" );
+void grabregion(int x, int y, int width, int height, char *spr)
+{ //asm("movl %3, %%edx                   \n\t"
+//       "movl %4, %%edi                   \n\t"
+// "grl0:                                  \n\t"
+//       "movl %1, %%eax                   \n\t"
+//       "imul $352, %%eax                 \n\t"
+//       "addl %0, %%eax                   \n\t"
+//       "addl _virscr, %%eax              \n\t"
+//       "movl %%eax, %%esi                \n\t"
+//       "movl %2, %%ecx                   \n\t"
+//       "shrl $1, %%ecx                   \n\t"
+//       "jnc grl1                         \n\t"
+//       "movsb                            \n\t"
+// "grl1:                                  \n\t"
+//       "repz                             \n\t"
+//       "movsw                            \n\t"
+//       "incl %1                          \n\t"
+//       "decl %%edx                       \n\t"
+//       "jnz grl0                         \n\t"
+//       :
+//       : "m" (x), "m" (y), "m" (width), "m" (height), "m" (spr)
+//       : "eax","edx","esi","edi","ecx","cc" );
 }
 
-tcopytile(int x, int y, char *spr, char *matte)
+void tcopytile(int x, int y, char *spr, char *matte)
 {
-  asm("movl $16, %%ecx                  \n\t"
-      "movl %2, %%esi                   \n\t"
-      "movl %1, %%edi                   \n\t"
-      "imul $352, %%edi                 \n\t"
-      "addl %0, %%edi                   \n\t"
-      "addl _virscr, %%edi              \n\t"
-      "movl %3, %%edx                   \n\t"
-"tctl0:                                 \n\t"
-      "movl (%%edi), %%eax              \n\t"
-      "andl (%%edx), %%eax              \n\t"
-      "orl  (%%esi), %%eax              \n\t"
-      "movl %%eax, (%%edi)              \n\t"
-      "movl 4(%%edi), %%eax             \n\t"
-      "andl 4(%%edx), %%eax             \n\t"
-      "orl  4(%%esi), %%eax             \n\t"
-      "movl %%eax, 4(%%edi)             \n\t"
-      "movl 8(%%edi), %%eax             \n\t"
-      "andl 8(%%edx), %%eax             \n\t"
-      "orl  8(%%esi), %%eax             \n\t"
-      "movl %%eax, 8(%%edi)             \n\t"
-      "movl 12(%%edi), %%eax            \n\t"
-      "andl 12(%%edx), %%eax            \n\t"
-      "orl  12(%%esi), %%eax            \n\t"
-      "movl %%eax, 12(%%edi)            \n\t"
-      "addl $16, %%esi                  \n\t"
-      "addl $352, %%edi                 \n\t"
-      "addl $16, %%edx                  \n\t"
-      "decl %%ecx                       \n\t"
-      "jnz tctl0                        \n\t"
-      :
-      : "m" (x), "m" (y), "m" (spr), "m" (matte)
-      : "eax","ecx","edx","esi","edi","cc" );
+//   asm("movl $16, %%ecx                  \n\t"
+//       "movl %2, %%esi                   \n\t"
+//       "movl %1, %%edi                   \n\t"
+//       "imul $352, %%edi                 \n\t"
+//       "addl %0, %%edi                   \n\t"
+//       "addl _virscr, %%edi              \n\t"
+//       "movl %3, %%edx                   \n\t"
+// "tctl0:                                 \n\t"
+//       "movl (%%edi), %%eax              \n\t"
+//       "andl (%%edx), %%eax              \n\t"
+//       "orl  (%%esi), %%eax              \n\t"
+//       "movl %%eax, (%%edi)              \n\t"
+//       "movl 4(%%edi), %%eax             \n\t"
+//       "andl 4(%%edx), %%eax             \n\t"
+//       "orl  4(%%esi), %%eax             \n\t"
+//       "movl %%eax, 4(%%edi)             \n\t"
+//       "movl 8(%%edi), %%eax             \n\t"
+//       "andl 8(%%edx), %%eax             \n\t"
+//       "orl  8(%%esi), %%eax             \n\t"
+//       "movl %%eax, 8(%%edi)             \n\t"
+//       "movl 12(%%edi), %%eax            \n\t"
+//       "andl 12(%%edx), %%eax            \n\t"
+//       "orl  12(%%esi), %%eax            \n\t"
+//       "movl %%eax, 12(%%edi)            \n\t"
+//       "addl $16, %%esi                  \n\t"
+//       "addl $352, %%edi                 \n\t"
+//       "addl $16, %%edx                  \n\t"
+//       "decl %%ecx                       \n\t"
+//       "jnz tctl0                        \n\t"
+//       :
+//       : "m" (x), "m" (y), "m" (spr), "m" (matte)
+//       : "eax","ecx","edx","esi","edi","cc" );
 }
 
-tcopysprite(int x, int y, int width, int height, char *spr)
-{ asm("movl %3, %%ecx                   \n\t"
-      "movl %4, %%esi                   \n\t"
-"tcsl0:                                 \n\t"
-      "movl %1, %%eax                   \n\t"
-      "imul $352, %%eax                 \n\t"
-      "addl %0, %%eax                   \n\t"
-      "addl _virscr, %%eax              \n\t"
-      "movl %%eax, %%edi                \n\t"
-      "movl %2, %%edx                   \n\t"
-"drawloop:                              \n\t"
-      "lodsb                            \n\t"
-      "orb %%al, %%al                   \n\t"
-      "jz nodraw                        \n\t"
-      "stosb                            \n\t"
-      "decl %%edx                       \n\t"
-      "jz endline                       \n\t"
-      "jmp drawloop                     \n\t"
-"nodraw:                                \n\t"
-      "incl %%edi                       \n\t"
-      "decl %%edx                       \n\t"
-      "jnz drawloop                     \n\t"
-"endline:                               \n\t"
-      "incl %1                          \n\t"
-      "decl %%ecx                       \n\t"
-      "jnz tcsl0                        \n\t"
-      :
-      : "m" (x), "m" (y), "m" (width), "m" (height), "m" (spr)
-      : "eax","edx","esi","edi","ecx","cc" );
+void tcopysprite(int x, int y, int width, int height, char *spr)
+{ //asm("movl %3, %%ecx                   \n\t"
+//       "movl %4, %%esi                   \n\t"
+// "tcsl0:                                 \n\t"
+//       "movl %1, %%eax                   \n\t"
+//       "imul $352, %%eax                 \n\t"
+//       "addl %0, %%eax                   \n\t"
+//       "addl _virscr, %%eax              \n\t"
+//       "movl %%eax, %%edi                \n\t"
+//       "movl %2, %%edx                   \n\t"
+// "drawloop:                              \n\t"
+//       "lodsb                            \n\t"
+//       "orb %%al, %%al                   \n\t"
+//       "jz nodraw                        \n\t"
+//       "stosb                            \n\t"
+//       "decl %%edx                       \n\t"
+//       "jz endline                       \n\t"
+//       "jmp drawloop                     \n\t"
+// "nodraw:                                \n\t"
+//       "incl %%edi                       \n\t"
+//       "decl %%edx                       \n\t"
+//       "jnz drawloop                     \n\t"
+// "endline:                               \n\t"
+//       "incl %1                          \n\t"
+//       "decl %%ecx                       \n\t"
+//       "jnz tcsl0                        \n\t"
+//       :
+//       : "m" (x), "m" (y), "m" (width), "m" (height), "m" (spr)
+//       : "eax","edx","esi","edi","ecx","cc" );
 }
 
-fin()
+void fin()
 { int i;
 
   if (!fade) return;
@@ -336,7 +345,7 @@ inloop:
   set_intensity(63);
 }
 
-fout()
+void fout()
 { int i;
 
    if (!fade) return;
@@ -380,7 +389,7 @@ unsigned char match(char r, char g, char b)
   return tabpt;
 }
 
-BuildTable(char r, char g, char b, char *dest)
+void BuildTable(char r, char g, char b, char *dest)
 { int i;
   unsigned char wr,wg,wb;
 
@@ -397,7 +406,7 @@ BuildTable(char r, char g, char b, char *dest)
       }
 }
 
-ColorScale(char *dest,int st,int fn,int inv)
+void ColorScale(char *dest,int st,int fn,int inv)
 { int i, intensity;
 
   for (i=0; i<256; i++)
@@ -411,7 +420,7 @@ ColorScale(char *dest,int st,int fn,int inv)
   }
 }
 
-PreCalc_TransparencyFields()
+void PreCalc_TransparencyFields()
 { FILE *f;
   int i;
 
@@ -420,12 +429,12 @@ PreCalc_TransparencyFields()
   f=fopen("VERGE.PAL","rb");
   fread(&vergepal, 1, 768, f);
   fclose(f);
-  transparencytbl=valloc(65536,"transparencytbl");
+  transparencytbl=(unsigned char*)valloc(65536,"transparencytbl");
 
   // Precompute some common translation tables.
 
-  ColorScale(&menuxlatbl,141,159,1);
-  ColorScale(&greyxlatbl,0,31,0);
+  ColorScale((char*)menuxlatbl,141,159,1);
+  ColorScale((char*)greyxlatbl,0,31,0);
 
   // Load in the 64k bitmap-on-bitmap transparency table (precomputed)
 
@@ -445,36 +454,36 @@ ColorField(int x1, int y1, int x2, int y2, unsigned char *colortbl)
           }
 }
 */
-ColorField(int x, int y, int x2, int y2, unsigned char *tbl)
+void ColorField(int x, int y, int x2, int y2, unsigned char *tbl)
 {
- asm( "movl %3, %%edx                   \n\t"
-      "subl %1, %%edx                   \n\t"   // get height
-      "movl %4, %%esi                   \n\t"
-"acf0:                                  \n\t"
-      "movl %1, %%edi                   \n\t"
-      "imul $352, %%edi                 \n\t"
-      "addl %0, %%edi                   \n\t"
-      "addl _virscr, %%edi              \n\t"
-      "movl %2, %%ecx                   \n\t"
-      "subl %0, %%ecx                   \n\t"  // get width
-"acf1:                                  \n\t"
-      "movl $0, %%eax                   \n\t"
-      "movb (%%edi), %%al               \n\t"
-      "addl %%esi, %%eax                \n\t"
-      "movb (%%eax), %%bl               \n\t"
-      "movb %%bl, (%%edi)               \n\t"
-      "incl %%edi                       \n\t"
-      "decl %%ecx                       \n\t"
-      "jnz acf1                         \n\t"
-      "incl %1                          \n\t"
-      "decl %%edx                       \n\t"
-      "jnz acf0                         \n\t"
-      :
-      : "m" (x), "m" (y), "m" (x2), "m" (y2), "m" (tbl)
-      : "eax","ebx","ecx","edx","esi","edi","cc" );
+//  asm( "movl %3, %%edx                   \n\t"
+//       "subl %1, %%edx                   \n\t"   // get height
+//       "movl %4, %%esi                   \n\t"
+// "acf0:                                  \n\t"
+//       "movl %1, %%edi                   \n\t"
+//       "imul $352, %%edi                 \n\t"
+//       "addl %0, %%edi                   \n\t"
+//       "addl _virscr, %%edi              \n\t"
+//       "movl %2, %%ecx                   \n\t"
+//       "subl %0, %%ecx                   \n\t"  // get width
+// "acf1:                                  \n\t"
+//       "movl $0, %%eax                   \n\t"
+//       "movb (%%edi), %%al               \n\t"
+//       "addl %%esi, %%eax                \n\t"
+//       "movb (%%eax), %%bl               \n\t"
+//       "movb %%bl, (%%edi)               \n\t"
+//       "incl %%edi                       \n\t"
+//       "decl %%ecx                       \n\t"
+//       "jnz acf1                         \n\t"
+//       "incl %1                          \n\t"
+//       "decl %%edx                       \n\t"
+//       "jnz acf0                         \n\t"
+//       :
+//       : "m" (x), "m" (y), "m" (x2), "m" (y2), "m" (tbl)
+//       : "eax","ebx","ecx","edx","esi","edi","cc" );
 }
 
-Tcopysprite(int x1, int y1, int width, int height, unsigned char *src)
+void Tcopysprite(int x1, int y1, int width, int height, unsigned char *src)
 { unsigned int j,i,jz,iz;
   unsigned char c,d;
 
@@ -488,7 +497,7 @@ Tcopysprite(int x1, int y1, int width, int height, unsigned char *src)
           }
 }
 
-_Tcopysprite(int x1, int y1, int width, int height, unsigned char *src)
+void _Tcopysprite(int x1, int y1, int width, int height, unsigned char *src)
 { unsigned int j,i,jz,iz;
   unsigned char c,d;
 
@@ -506,12 +515,12 @@ _Tcopysprite(int x1, int y1, int width, int height, unsigned char *src)
 
 unsigned char oc=31;
 
-LoadFont()
+void LoadFont()
 { FILE *f;
 
-  fnt=valloc(6000,"fnt");
-  fnt2=valloc(14000,"fnt2");
-  tbox=valloc(30000,"tbox");
+  fnt=(char*)valloc(6000,"fnt");
+  fnt2=(char*)valloc(14000,"fnt2");
+  tbox=(char*)valloc(30000,"tbox");
   if (!(f=fopen("SMALL.FNT","rb"))) err("FATAL ERROR: Could not open SMALL.FNT.");
   fread(fnt, 63, 95, f);
   fclose(f);
@@ -523,7 +532,7 @@ LoadFont()
   fclose(f);
 }
 
-pchar(int x, int y, char c)
+void pchar(int x, int y, char c)
 { char *img;
 
   if ((c<32) || (c>126)) return;
@@ -533,7 +542,7 @@ pchar(int x, int y, char c)
   else tcopysprite(x,y,7,9,img);
 }
 
-VCpchar(int x, int y, char c)
+void VCpchar(int x, int y, char c)
 { char *img;
 
   if ((c<32) || (c>126)) return;
@@ -543,7 +552,7 @@ VCpchar(int x, int y, char c)
   else VCtcopysprite(x,y,7,9,img);
 }
 
-bigpchar(int x, int y, char c)
+void bigpchar(int x, int y, char c)
 { char *img;
 
   if ((c<32) || (c>126)) return;
@@ -553,12 +562,12 @@ bigpchar(int x, int y, char c)
   else tcopysprite(x,y,9,16,img);
 }
 
-gotoxy(int x, int y)
+void gotoxy(int x, int y)
 { x1=x;
   y1=y;
 }
 
-printstring(char *str)
+void printstring(char *str)
 { int i;
   char c;
 
@@ -573,7 +582,7 @@ mainloop:
   if (str[i]!=0) goto mainloop;
 }
 
-VCprintstring(int xx, int yy, char *str)
+void VCprintstring(int xx, int yy, char *str)
 { int i;
   char c;
 
@@ -588,7 +597,7 @@ mainloop:
   if (str[i]!=0) goto mainloop;
 }
 
-bigprintstring(char *str)
+void bigprintstring(char *str)
 { int i;
   char c;
 
@@ -603,39 +612,39 @@ mainloop:
   if (str[i]!=0) goto mainloop;
 }
 
-putbox()
+void putbox()
 {
-  ColorField(18,151,334,213,&menuxlatbl);
+  ColorField(18,151,334,213,menuxlatbl);
   tcopysprite(16,149,320,66,tbox);
 
 //  border(18,149,333,213);
 }
 
-dec_to_asciiz(int num, char *buf)
-{  asm ("movl $10, %%ebx              \n\t"
-        "movl %0, %%eax               \n\t"
-        "movl %1, %%edi               \n\t"
-        "xor %%ecx, %%ecx             \n\t"
-"dtal0:                               \n\t"
-        "xor %%edx, %%edx             \n\t"
-        "div %%ebx                    \n\t"
-        "pushw %%dx                   \n\t"
-        "incl %%ecx                   \n\t"
-        "orl %%eax, %%eax             \n\t"
-        "jnz dtal0                    \n\t"
-"dtal1:                               \n\t"
-        "popw %%ax                    \n\t"
-        "addb $48, %%al               \n\t"
-        "stosb                        \n\t"
-        "loop dtal1                   \n\t"
-        "xor %%al, %%al               \n\t"
-        "stosb                        \n\t"
-        :
-        : "m" (num), "m" (buf)
-        : "eax","ebx","edi","ecx","cc" );
+void dec_to_asciiz(int num, char *buf)
+{  //asm ("movl $10, %%ebx              \n\t"
+//         "movl %0, %%eax               \n\t"
+//         "movl %1, %%edi               \n\t"
+//         "xor %%ecx, %%ecx             \n\t"
+// "dtal0:                               \n\t"
+//         "xor %%edx, %%edx             \n\t"
+//         "div %%ebx                    \n\t"
+//         "pushw %%dx                   \n\t"
+//         "incl %%ecx                   \n\t"
+//         "orl %%eax, %%eax             \n\t"
+//         "jnz dtal0                    \n\t"
+// "dtal1:                               \n\t"
+//         "popw %%ax                    \n\t"
+//         "addb $48, %%al               \n\t"
+//         "stosb                        \n\t"
+//         "loop dtal1                   \n\t"
+//         "xor %%al, %%al               \n\t"
+//         "stosb                        \n\t"
+//         :
+//         : "m" (num), "m" (buf)
+//         : "eax","ebx","edi","ecx","cc" );
 }
 
-textwindow(char portrait, char *str1, char *str2, char *str3)
+void textwindow(char portrait, char *str1, char *str2, char *str3)
 {
  tcopysprite(20,114,32,32,speech+(portrait*1024));
  putbox();
@@ -647,7 +656,7 @@ textwindow(char portrait, char *str1, char *str2, char *str3)
  bigprintstring(str3);
 }
 
-fontcolor(unsigned char c)
+void fontcolor(unsigned char c)
 { int i;
   char *ptr;
 

@@ -1,3 +1,8 @@
+#ifndef VC_H
+#define VC_H
+
+#include <stdio.h>
+
 // Single-byte opcode descriptors
 
 #define EXEC 1
@@ -47,3 +52,17 @@
 #define DIV 4
 #define MOD 5
 #define OP_END 255
+
+extern void StartupScript();
+extern void InitVCMem();
+extern void LoadVC(FILE* f);
+extern void ExecuteScript(unsigned short int s);
+extern void ExecuteHookedScript(unsigned short int s);
+extern unsigned int ResolveOperand();
+extern unsigned char GrabC();
+extern void ExecuteEffect(unsigned short int s);
+extern void ExecuteBlock();
+extern void GrabString(char* str);
+extern void ExecuteMagicEffect(unsigned short int s);
+
+#endif

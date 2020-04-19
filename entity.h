@@ -1,3 +1,6 @@
+#ifndef ENTITY_H
+#define ENTITY_H
+
 struct chrrec {
   char fname[13]                       __attribute__ ((packed));
 };
@@ -17,3 +20,15 @@ struct entitydata
 extern struct chrrec chrlist[100];           // CHR list
 extern struct entitydata entity[100];        // Entity data
 extern int entities;                         // number of active entities
+extern int msofstbl[100];
+
+extern int EntityAt(int ex, int ey);
+extern int AnyEntityAt(int ex, int ey);
+extern void ProcessSpeedAdjEntity(int i);
+extern void GetNextCommand(int i);
+extern void MoveUp(int i);
+extern void MoveDown(int i);
+extern void MoveLeft(int i);
+extern void MoveRight(int i);
+
+#endif

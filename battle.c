@@ -3,13 +3,17 @@
 // Copyright (C)1997 BJ Eirich
 
 #include <stdio.h>
+#include <stdlib.h> // rand
+#include <string.h> // strcpy
 #include "control.h"
 #include "engine.h"
 #include "keyboard.h"
 #include "timer.h"
 #include "vga.h"
+#include "render.h"
+#include "menu.h"
 
-extern *strbuf;
+extern char* strbuf;
 FILE *d;
 
 char whotoattack()
@@ -112,8 +116,8 @@ void levelup (int chr)
   }
 
   if (!alreadyhave)
-  {         
-     img=magicicons+(magic[i].icon*256);
+  {
+     img=(char*)magicicons+(magic[i].icon*256);
      while (!b1 && !b2 && !b4 && !b4)
      {
        drawmap();
@@ -133,15 +137,15 @@ void levelup (int chr)
          pstats[chr].maginv[j]=i;
          pstats[chr].magcnt++;
        }
-     else pstats[chr].maginv[j-1]=i;       
+     else pstats[chr].maginv[j-1]=i;
    }
-    
+
   fclose(d);
 
   UpdateEquipStats();
 }
 
-battle()
+void battle()
 { unsigned char t1;
 
   t1=whotoattack();

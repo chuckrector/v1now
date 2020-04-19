@@ -3,6 +3,8 @@
 // Copyright (C)1997 BJ Eirich
 
 #include <stdio.h>
+#include <stdlib.h> // malloc
+#include <string.h> // memset
 #include "control.h"
 #include "entity.h"
 #include "keyboard.h"
@@ -10,113 +12,120 @@
 #include "sound.h"
 #include "timer.h"
 #include "vga.h"
-extern err(char *ermsg);
+#include "vc.h"
+#include "menu.h"
+#include "ricvc.h"
+#include "engine.h"
+
+extern void err(char *ermsg);
+
+void process_controls();
 
 // ============================ Data ============================
 
-struct r_entity {                      // on-screen entities (chars)
-  unsigned short x;                    // xwc position
-  unsigned short y;                    // ywc position
-  unsigned char facing;                // direction entity is facing
-  unsigned char moving;                // direction entity is moving
-  unsigned char movcnt;                // how far left to move in this tile
-  unsigned char framectr;              // frame sequence counter
-  unsigned char specframe;             // special-frame set thingo
-  unsigned char chrindex, movecode;    // CHR index / movement pattern code
-  unsigned char activmode, obsmode;    // activation mode, obstruction mode
-  unsigned int actscript, movescript;  // script references
-  unsigned char speed, speedct;        // entity speed, speedcount :)
-  unsigned short step, delay,          // Misc data entries
-                 data1, data2,         // More misc data
-                 data3, data4,         // yet more crappy misc data.
-                 delayct,adjactv;      // yet more internal crap
-  unsigned short x1,y1,x2,y2;          // bounding box coordinates
-  unsigned char curcmd, cmdarg;        // Script commands/arguments
-  unsigned char *scriptofs;            // offset in script parsing
-  unsigned char face,chasing,          // face player when activated | chasing
-                chasespeed, chasedist; // chasing variables
-  unsigned short cx,cy;                // current-tile pos (moving adjusted)
-  int expand1;                         // always room for improvement
-  char entitydesc[20];                 // Editing description
-};
+// struct r_entity {                      // on-screen entities (chars)
+//   unsigned short x;                    // xwc position
+//   unsigned short y;                    // ywc position
+//   unsigned char facing;                // direction entity is facing
+//   unsigned char moving;                // direction entity is moving
+//   unsigned char movcnt;                // how far left to move in this tile
+//   unsigned char framectr;              // frame sequence counter
+//   unsigned char specframe;             // special-frame set thingo
+//   unsigned char chrindex, movecode;    // CHR index / movement pattern code
+//   unsigned char activmode, obsmode;    // activation mode, obstruction mode
+//   unsigned int actscript, movescript;  // script references
+//   unsigned char speed, speedct;        // entity speed, speedcount :)
+//   unsigned short step, delay,          // Misc data entries
+//                  data1, data2,         // More misc data
+//                  data3, data4,         // yet more crappy misc data.
+//                  delayct,adjactv;      // yet more internal crap
+//   unsigned short x1,y1,x2,y2;          // bounding box coordinates
+//   unsigned char curcmd, cmdarg;        // Script commands/arguments
+//   unsigned char *scriptofs;            // offset in script parsing
+//   unsigned char face,chasing,          // face player when activated | chasing
+//                 chasespeed, chasedist; // chasing variables
+//   unsigned short cx,cy;                // current-tile pos (moving adjusted)
+//   int expand1;                         // always room for improvement
+//   char entitydesc[20];                 // Editing description
+// };
 
-struct vspanim {
-  unsigned short int start;            // start tile index
-  unsigned short int finish;           // end tile index
-  unsigned short int delay;            // delay between cycles
-  unsigned short int mode; };          // animation mode
+// struct vspanim {
+//   unsigned short int start;            // start tile index
+//   unsigned short int finish;           // end tile index
+//   unsigned short int delay;            // delay between cycles
+//   unsigned short int mode; };          // animation mode
 
-struct zoneinfo {                      // zone data
-  char zonename[15];                   // zone description
-  unsigned short int callevent;        // event number to call
-  unsigned char percent;               // chance (in 255) of event occurance
-  unsigned char delay;                 // step-delay before last occurance
-  unsigned char aaa;                   // accept adjacent activation
-  char savedesc[30];                   // savegame description
-};
+// struct zoneinfo {                      // zone data
+//   char zonename[15];                   // zone description
+//   unsigned short int callevent;        // event number to call
+//   unsigned char percent;               // chance (in 255) of event occurance
+//   unsigned char delay;                 // step-delay before last occurance
+//   unsigned char aaa;                   // accept adjacent activation
+//   char savedesc[30];                   // savegame description
+// };
 
-struct charstats {                     // Stat record for single character
-  char name[9];                        // 8-character name + null
-  char chrfile[13];                    // CHR file for this character
-  int exp, rea;                        // experience points, REAction
-  int curhp, maxhp;                    // current/max hit points
-  int curmp, maxmp;                    // current/max magic points
-  int atk, def;                        // ATtacK and DEFense stats
-  int str, end;                        // STRength and ENDurance
-  int mag, mgr;                        // MAGic and MaGic Resistance stats
-  int hit, dod;                        // HIT% and DODge%
-  int mbl, fer;                        // MoBiLity and FERocity (not related)
-  int magc, mgrc;                      // MAGic and MaGic Resistance stats
-  int hitc, dodc;                      // HIT% and DODge%
-  int mblc, ferc;                      // MoBiLity and FERocity (not related)
-  int reac;                            // reaction (all ***c stats are current)
-  int nxt, lv;                         // exp to next level, current level
-  char status;                         // 0=fine 1=dead 2=...
-  unsigned char invcnt;                // number of items in inventory
-  unsigned short int inv[24];          // inventory
+// struct charstats {                     // Stat record for single character
+//   char name[9];                        // 8-character name + null
+//   char chrfile[13];                    // CHR file for this character
+//   int exp, rea;                        // experience points, REAction
+//   int curhp, maxhp;                    // current/max hit points
+//   int curmp, maxmp;                    // current/max magic points
+//   int atk, def;                        // ATtacK and DEFense stats
+//   int str, end;                        // STRength and ENDurance
+//   int mag, mgr;                        // MAGic and MaGic Resistance stats
+//   int hit, dod;                        // HIT% and DODge%
+//   int mbl, fer;                        // MoBiLity and FERocity (not related)
+//   int magc, mgrc;                      // MAGic and MaGic Resistance stats
+//   int hitc, dodc;                      // HIT% and DODge%
+//   int mblc, ferc;                      // MoBiLity and FERocity (not related)
+//   int reac;                            // reaction (all ***c stats are current)
+//   int nxt, lv;                         // exp to next level, current level
+//   char status;                         // 0=fine 1=dead 2=...
+//   unsigned char invcnt;                // number of items in inventory
+//   unsigned short int inv[24];          // inventory
 
-  // *** NEW *** : Magic
-  unsigned char magcnt;                // number of items in inventory
-  unsigned short int maginv[24];          // inventory
+//   // *** NEW *** : Magic
+//   unsigned char magcnt;                // number of items in inventory
+//   unsigned short int maginv[24];          // inventory
 
-};
+// };
 
-struct itemdesc {
-  unsigned char name[20];              // item name
-  unsigned short int icon;             // icon index
-  unsigned char desc[40];              // item description
-  unsigned char useflag;               // Useable flag <see below>
-  unsigned short int useeffect;        // effect list index
-  unsigned char itemtype;              // item type index
-  unsigned char equipflag;             // 0=nonequipable 1=equipable
-  unsigned char equipidx;              // equip.dat index value
-  unsigned char itmprv;                // item preview code
-  unsigned int price;                  // Cost of the item in a store
-};
+// struct itemdesc {
+//   unsigned char name[20];              // item name
+//   unsigned short int icon;             // icon index
+//   unsigned char desc[40];              // item description
+//   unsigned char useflag;               // Useable flag <see below>
+//   unsigned short int useeffect;        // effect list index
+//   unsigned char itemtype;              // item type index
+//   unsigned char equipflag;             // 0=nonequipable 1=equipable
+//   unsigned char equipidx;              // equip.dat index value
+//   unsigned char itmprv;                // item preview code
+//   unsigned int price;                  // Cost of the item in a store
+// };
 
-// *** NEW *** MAGIC
+// // *** NEW *** MAGIC
 
-struct magicdesc {
-  unsigned char name[20];              // magic name
-  unsigned short int icon;             // icon index
-  unsigned char desc[40];              // magic description
-  unsigned char useflag;               // Useable flag <see below>
-  unsigned short int useeffect;        // magic effect list index
-  unsigned char itemtype;              // magic type index
-  unsigned char equipflag;             // 0=nonequipable 1=equipable
-  unsigned char equipidx;              // magiceq.dat index value
-  unsigned char itmprv;                // magic preview code
-  unsigned int price;                  // Cost of the magic in a store
-};
+// struct magicdesc {
+//   unsigned char name[20];              // magic name
+//   unsigned short int icon;             // icon index
+//   unsigned char desc[40];              // magic description
+//   unsigned char useflag;               // Useable flag <see below>
+//   unsigned short int useeffect;        // magic effect list index
+//   unsigned char itemtype;              // magic type index
+//   unsigned char equipflag;             // 0=nonequipable 1=equipable
+//   unsigned char equipidx;              // magiceq.dat index value
+//   unsigned char itmprv;                // magic preview code
+//   unsigned int price;                  // Cost of the magic in a store
+// };
 
-// END NEW
+// // END NEW
 
-struct equipstruc {
-  int str,end,mag,mgr,hit,dod;
-  int mbl,fer,rea;
-  char equipable[30];
-  char onequip, ondeequip;
-};
+// struct equipstruc {
+//   int str,end,mag,mgr,hit,dod;
+//   int mbl,fer,rea;
+//   char equipable[30];
+//   char onequip, ondeequip;
+// };
 
 // Useflag values:   0 for nonusable.
 //                   1 for usable once, then it goes away.
@@ -132,6 +141,8 @@ struct equipstruc {
 //                   3 for 1E. (One Enemy)
 //                   4 for AE. (All Enemy)
 
+unsigned char autoent=0;
+
 char lastmoves[6];                     // the party leader's last six moves
 char partyidx[5];                      // current character-ref indexes
 char numchars=0;                       // number of characters to draw
@@ -140,14 +151,16 @@ struct r_entity party[101];            // party entities
 struct zoneinfo zone[128];             // entity records
 struct charstats pstats[30];           // party-stats record
 struct itemdesc items[255];            // item definition array
+unsigned char layerc,saveflag;
+unsigned int numtiles;
 
 // *** NEW *** MAGIC
 
-struct mequipstruc {
-  char equipable[30];
-  char level[30];
-  char onequip, ondeequip;
-};
+// struct mequipstruc {
+//   char equipable[30];
+//   char level[30];
+//   char onequip, ondeequip;
+// };
 
 struct magicdesc magic[255];
 unsigned char *magicicons;        // more graphic ptrs
@@ -163,7 +176,7 @@ int gp;                                // party's gold (or meseta, s, $, etc)
 unsigned short int vadelay[100];       // delay counter
 
 unsigned short int *map0=NULL;        // map data pointers
-unsigned short int *map1=NULL;        
+unsigned short int *map1=NULL;
 unsigned char *mapp=NULL;
 
 unsigned char *vsp0,*chrs;       // graphic data pointers
@@ -173,7 +186,7 @@ unsigned int flags[8000];              // misc flags
 FILE *map,*vsp;                        // file handles
 char mapname[13], musname[13];         // map/music filenames
 char vsp0name[13], levelname[30];      // vsp filename / level name
-char layerc,showname,saveflag;         // control flags
+char showname;         // control flags
 
 /* -- ric: 21/Apr/98 - moved to process_controls -- */
 // char l,r,t,b;                          // wall status
@@ -186,13 +199,13 @@ unsigned char pmultx,pdivx;            // parallax speed X
 unsigned char pmulty,pdivy;            // parallax speed X
 char warp, hide;                       // map warpable / hidable flags
 
-char dontshowname=0,usenxy=0,qabort=0,autoent=0;
-unsigned short int nx=0,ny=0,numtiles;
+char dontshowname=0,usenxy=0,qabort=0;
+unsigned short int nx=0,ny=0;
 
 extern char *strbuf,*speech,*msbuf,menuactive;
 extern unsigned char nummovescripts;
 //extern int mapvcm; // -- aen; 31/May/98 -- no longer used; see LoadVC().
-extern int msofstbl[100];
+// extern int msofstbl[100];
 extern int vspm; // -- aen; 30/May/98 -- no longer used; see load_map().
 //extern int mapm; // -- aen; 30/May/98 -- no longer used; see load_map().
 
@@ -225,22 +238,22 @@ void vfree(void *thismem)
   thismem = NULL;
   }
 
-allocbuffers()
+void allocbuffers()
   {
   //map0 = valloc(mapm*2, "map0"); // -- aen; 30/May/98 -- removed; this is
   //map1 = valloc(mapm*2, "map1"); // -- taken care of automatically within
   //mapp = valloc(mapm, "mapp");   // -- load_map().
 
   //vsp0 = valloc(vspm, "vsp0");
-  chrs = valloc(512000, "chrs");
-  chr2 = valloc(46080, "chr2");
+  chrs = (unsigned char*)valloc(512000, "chrs");
+  chr2 = (unsigned char*)valloc(46080, "chr2");
 
   // -- NichG; ??/??/?? --
-  magicicons = valloc(50688, "magicicons");
+  magicicons = (unsigned char*)valloc(50688, "magicicons");
 
-  itemicons = valloc(50688, "itemicons");
-  speech = valloc(450000, "speech");
-  msbuf = valloc(20000, "msbuf");
+  itemicons = (unsigned char*)valloc(50688, "itemicons");
+  speech = (char*)valloc(450000, "speech");
+  msbuf = (char*)valloc(20000, "msbuf");
 
   //memset(map0,0,mapm*2);     /* -- ric:28/Apr/98 --                 */
   //memset(map1,0,mapm*2);     /* Clear all the allocated memory just */
@@ -257,10 +270,10 @@ allocbuffers()
   InitVCMem();
   }
 
-addcharacter(int i)
+void addcharacter(int i)
 { FILE *chrf,*p;
   int b;
-        
+
   numchars++;
   partyidx[numchars-1]=i;
   p=fopen("PARTY.DAT","r");
@@ -323,20 +336,20 @@ addcharacter(int i)
   fclose(chrf);
 }
 
-LoadCHRList()
+void LoadCHRList()
 { int i;
   FILE *f;
 
   for (i=0; i<20; i++)
-    if (strlen(&chrlist[i]))
+    if (strlen(chrlist[i].fname))
     {
-      f=fopen(&chrlist[i],"rb");
+      f=fopen(chrlist[i].fname,"rb");
       fread(chrs+((i+5)*15360),30,512,f);
       fclose(f);
     }
 }
 
-load_map(char *fname)
+void load_map(char *fname)
   {
   unsigned char b;
   int i;
@@ -384,9 +397,9 @@ load_map(char *fname)
   vfree(map1);
   vfree(mapp);
   // allocate exact amount of mem needed
-  map0 = valloc((xsize * ysize) * 2, "load_map:map0");
-  map1 = valloc((xsize * ysize) * 2, "load_map:map1");
-  mapp = valloc((xsize * ysize), "load_map:mapp");
+  map0 = (short unsigned int*)valloc((xsize * ysize) * 2, "load_map:map0");
+  map1 = (short unsigned int*)valloc((xsize * ysize) * 2, "load_map:map1");
+  mapp = (unsigned char*)valloc((xsize * ysize), "load_map:mapp");
 
   fread(map0, xsize, ysize*2, map); // read in background layer
   fread(map1, xsize, ysize*2, map); // read in foreground layer
@@ -431,7 +444,7 @@ load_map(char *fname)
   // -- aen; 31/May/98 -- dynamic map mem allocation
   vfree(vsp0);
   vspm = numtiles << 8;
-  vsp0 = valloc(vspm, "load_map:vsp0");
+  vsp0 = (unsigned char*)valloc(vspm, "load_map:vsp0");
 
   fread(vsp0, 1, vspm, vsp);
   fread(&va0, 1, sizeof(va0), vsp);
@@ -481,7 +494,7 @@ load_map(char *fname)
   ExecuteScript(0);
   }
 
-process_stepzone()
+void process_stepzone()
 { // Called each time the player steps in a new square. Looks up current zone
   // information, adjusts for delays and then makes a chance roll to see if
   // an event is called.
@@ -502,7 +515,7 @@ process_stepzone()
   }
 }
 
-lastmove(char n)
+void lastmove(char n)
 { // moves all the entrees in the lastmoves array down one, then places the
   // new direction at the front.
 
@@ -514,7 +527,7 @@ lastmove(char n)
   lastmoves[0]=n;
 }
 
-startfollow()
+void startfollow()
 { char i;
   for (i=1; i<numchars; i++)
       { if (lastmoves[i]==1)
@@ -542,7 +555,7 @@ int InvFace()
   }
 }
 
-Activate()
+void Activate()
 { int tx,ty;
   unsigned char cz,t;
 
@@ -583,7 +596,7 @@ int ObstructionAt(int tx,int ty)
   return 0;
 }
 
-process_entities()
+void process_entities()
 { int i;
 
   for (i=5; i<entities; i++)
@@ -594,7 +607,7 @@ process_entities()
        ProcessSpeedAdjEntity(i);
 }
 
-ProcessControls()
+void ProcessControls()
 {
   if (party[0].speed<4)
   {
@@ -615,7 +628,7 @@ ProcessControls()
   }
 }
 
-process_controls()
+void process_controls()
 { unsigned char i;
   char l,r,t,b;  /* -- ric: 21/Apr/98 - moved from top -- */
   party[0].speedct=0;
@@ -683,7 +696,7 @@ process_controls()
   }
 }
 
-check_tileanimation()
+void check_tileanimation()
 { unsigned char i;
 
   for (i=0; i<100; i++)
@@ -692,7 +705,7 @@ check_tileanimation()
         vadelay[i]++; }
 }
 
-UpdateEquipStats()
+void UpdateEquipStats()
 { int i,j,a;
 
   // This function takes the base stats of all characters and re-calculates
@@ -726,7 +739,7 @@ UpdateEquipStats()
   }
 }
 
-game_ai()
+void game_ai()
 {
   ProcessControls();
   process_entities();
@@ -735,7 +748,7 @@ game_ai()
   check_tileanimation();
 }
 
-CreateSaveImage(unsigned char *buf)
+void CreateSaveImage(unsigned char *buf)
 {
   memcpy(buf,chrs,512);
   if (numchars>1) memcpy(buf+512,chrs+15360,512);
@@ -748,7 +761,7 @@ CreateSaveImage(unsigned char *buf)
              else memset(buf+2048,0,512);
 }
 
-SaveGame(char *fn)
+void SaveGame(char *fn)
 { FILE *f;
   unsigned char cz;
   unsigned char temp[2560];
@@ -766,7 +779,7 @@ SaveGame(char *fn)
   fwrite(&sec, 1, 1, f);
   fwrite(&numchars, 1, 1, f);
   fwrite(&menuactive, 1, 1, f);
-  CreateSaveImage(&temp);
+  CreateSaveImage(temp);
   fwrite(&temp, 1, 2560, f);
   fwrite(&mapname, 1, 13, f);
   fwrite(&party, 1, sizeof party, f);
@@ -777,7 +790,7 @@ SaveGame(char *fn)
   fclose(f);
 }
 
-startmap(char *fname)
+void startmap(char *fname)
 {
   if (qabort) return;
 

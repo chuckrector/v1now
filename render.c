@@ -3,11 +3,17 @@
 // Copyright (C)1997 BJ Eirich
 
 #include <stdio.h>
+#include <string.h> // memset
+#include <stdlib.h>
 #include "engine.h"
 #include "entity.h"
 #include "vga.h"
-extern err(char *ermsg);
+#include "vclib.h"
+#include "vc.h"
+
+extern void err(char *ermsg);
 extern char *strbuf;
+extern int random(int min, int max);
 
 // ============================ Data ============================
 
@@ -28,29 +34,29 @@ int quake=0,quakex,quakey,qswitch=0;   // render-quake flags
 int screengradient=0;                  // fullscreen mappalettegradient
 int (*DrawLayer1) (int xw, int yw);    // DrawLayer1 "driver"-style ptr
 
-DrawLayer1NoSpeed(int xw, int yw);     // DrawLayer1 funcs pre-defines
-DrawLayer1Speed(int xw, int yw);       // DrawLayer1 funcs pre-defines
+int DrawLayer1NoSpeed(int xw, int yw);     // DrawLayer1 funcs pre-defines
+int DrawLayer1Speed(int xw, int yw);       // DrawLayer1 funcs pre-defines
 
 extern int vspm;                       // external def-amount of VSP memory
 
 // ============================ Code ============================
 
-InitRenderSystem()
+void InitRenderSystem()
 {
-  vcscreen1=(char *) valloc(64000,"vcscreen1");
+  vcscreen1=(unsigned char *) valloc(64000,"vcscreen1");
   //memset(vcscreen1, 0, 64000);
-  vcscreen2=(char *) valloc(64000,"vcscreen2");
+  vcscreen2=(unsigned char *) valloc(64000,"vcscreen2");
   //memset(vcscreen2, 0, 64000);
   vcscreen=vcscreen1;
   if (vspspeed)
   {
     vspmask=(char *) valloc(vspm,"vspmask");
-    DrawLayer1=&DrawLayer1Speed;
+    DrawLayer1=DrawLayer1Speed;
   }
-  else DrawLayer1=&DrawLayer1NoSpeed;
+  else DrawLayer1=DrawLayer1NoSpeed;
 }
 
-CalcVSPMask()
+void CalcVSPMask()
 { int i;
 
   for (i=0; i<(numtiles*256); i++)
@@ -60,7 +66,7 @@ CalcVSPMask()
   }
 }
 
-drawchar(int i, int xw, int yw)
+void drawchar(int i, int xw, int yw)
 { char *img, fr;
   int dx,dy,drawmode=0;
 
@@ -72,7 +78,7 @@ drawchar(int i, int xw, int yw)
   if (dy<0) drawmode=1;
   if (dy>200) drawmode=2;
 
-  img=chrs+(party[i].chrindex*15360);
+  img=(char*)chrs+(party[i].chrindex*15360);
 
   switch (party[i].facing)
   {
@@ -102,7 +108,7 @@ drawchar(int i, int xw, int yw)
   }
 }
 
-SwitchOrder(int i, int j)
+void SwitchOrder(int i, int j)
 { unsigned char c;
 
   c=draworder[i];
@@ -110,7 +116,7 @@ SwitchOrder(int i, int j)
   draworder[j]=c;
 }
 
-SortDrawOrder()
+void SortDrawOrder()
 { int i,j;
 
   for (i=1; i<numdraw; i++)
@@ -119,13 +125,14 @@ SortDrawOrder()
            SwitchOrder(j,j-1);
 }
 
-setdrawchar(unsigned char i)
+void setdrawchar(unsigned char i)
 {
   draworder[numdraw]=i;
   numdraw++;
 }
 
-drawcharacters(int xw,int yw)
+void drawchars(int xw, int yw);
+void drawcharacters(int xw,int yw)
 { int i;
 
   memset(&draworder,0,100);
@@ -146,14 +153,14 @@ drawcharacters(int xw,int yw)
   drawchars(xw,yw);
 }
 
-drawchars(int xw, int yw)
+void drawchars(int xw, int yw)
 { int i;
 
   for (i=0; i<numdraw; i++)
       drawchar(draworder[i],xw,yw);
 }
 
-ProcessEarthQuake()
+void ProcessEarthQuake()
 { int nx,ny;
 
   nx=xwin;
@@ -174,21 +181,21 @@ ProcessEarthQuake()
   drawmaploc(nx,ny);
 }
 
-drawvclayer()
+void drawvclayer()
 {
        if (layervctrans==1)  Tcopysprite(16,16,320,200,vcscreen1);
   else if (layervctrans==2) _Tcopysprite(16,16,320,200,vcscreen1);
-                        else tcopysprite(16,16,320,200,vcscreen1);
+                        else tcopysprite(16,16,320,200,(char*)vcscreen1);
 }
-drawvclayer2()
+void drawvclayer2()
 {
        if (layervc2trans==1)  Tcopysprite(16,16,320,200,vcscreen2);
   else if (layervc2trans==2) _Tcopysprite(16,16,320,200,vcscreen2);
-                         else tcopysprite(16,16,320,200,vcscreen2);
+                         else tcopysprite(16,16,320,200,(char*)vcscreen2);
 }
 
-
-drawmap()
+void DrawLayer0(int xw, int yw);
+void drawmap()
 {
   if (cameratracking)
   {
@@ -210,10 +217,10 @@ drawmap()
   if ((layerc==1) || (layerc==2)) drawcharacters(xwin,ywin);
   if (layervc==1) drawvclayer();
   if (layervc2==1) drawvclayer2();
-  if (screengradient) ColorField(16,16,336,216,&scrnxlatbl);
+  if (screengradient) ColorField(16,16,336,216,(unsigned char*)scrnxlatbl);
 }
 
-drawmaploc(int xw, int yw)
+void drawmaploc(int xw, int yw)
 {
   if (hookretrace) ExecuteScript(hookretrace);
   if (layer0) DrawLayer0(xw,yw);
@@ -223,10 +230,10 @@ drawmaploc(int xw, int yw)
   if ((layerc==1) || (layerc==2) && drawparty) drawcharacters(xw,yw);
   if (layervc) drawvclayer();
   if (layervc2) drawvclayer2();
-  if (screengradient) ColorField(16,16,336,216,&scrnxlatbl);
+  if (screengradient) ColorField(16,16,336,216,(unsigned char*)scrnxlatbl);
 }
 
-DrawLayer0(int xw, int yw)
+void DrawLayer0(int xw, int yw)
 { char *img;
   int i,j,oxw,oyw;
 
@@ -246,11 +253,11 @@ else
 
   for (i=0; i<14; i++)
    for (j=0; j<21; j++)
-    { img=vsp0+(tileidx[map0[(((ytc+i)%ysize)*xsize)+((xtc+j)%xsize)]]<<8);
+    { img=(char*)vsp0+(tileidx[map0[(((ytc+i)%ysize)*xsize)+((xtc+j)%xsize)]]<<8);
       copytile((j<<4)+xofs,(i<<4)+yofs,img); }
 }
 
-DrawLayer1Trans(int xw, int yw)
+void DrawLayer1Trans(int xw, int yw)
 { char *img;
   int i,j,oxw,oyw;
 
@@ -270,11 +277,11 @@ else
 
   for (i=0; i<14; i++)
    for (j=0; j<21; j++)
-    { img=vsp0+(tileidx[map1[(((ytc+i) % ysize)*xsize)+((xtc+j)%xsize)]]<<8);
-      if (img!=vsp0) Tcopysprite((j<<4)+xofs,(i<<4)+yofs,16,16,img); }
+    { img=(char *)vsp0+(tileidx[map1[(((ytc+i) % ysize)*xsize)+((xtc+j)%xsize)]]<<8);
+      if (img!=(char*)vsp0) Tcopysprite((j<<4)+xofs,(i<<4)+yofs,16,16,(unsigned char*)img); }
 }
 
-_DrawLayer1Trans(int xw, int yw)
+void _DrawLayer1Trans(int xw, int yw)
 { char *img;
   int i,j,oxw,oyw;
 
@@ -294,25 +301,25 @@ else
 
   for (i=0; i<14; i++)
    for (j=0; j<21; j++)
-    { img=vsp0+(tileidx[map1[(((ytc+i) % ysize)*xsize)+((xtc+j)%xsize)]]<<8);
-      if (img!=vsp0) _Tcopysprite((j<<4)+xofs,(i<<4)+yofs,16,16,img); }
+    { img=(char*)vsp0+(tileidx[map1[(((ytc+i) % ysize)*xsize)+((xtc+j)%xsize)]]<<8);
+      if (img!=(char*)vsp0) _Tcopysprite((j<<4)+xofs,(i<<4)+yofs,16,16,(unsigned char*)img); }
 }
 
 
-DrawLayer1NoSpeed(int xw, int yw)
+int DrawLayer1NoSpeed(int xw, int yw)
 { char *img;
   int i,j,oxw,oyw;
 
 if (layer1trans==1)
 {
   DrawLayer1Trans(xw, yw);
-  return;
+  return(0);
 }
 
 if (layer1trans==2)
 {
   _DrawLayer1Trans(xw, yw);
-  return;
+  return(0);
 }
 
 if (layerc<3)
@@ -331,24 +338,25 @@ else
 
   for (i=0; i<14; i++)
    for (j=0; j<21; j++)
-    { img=vsp0+(tileidx[map1[(((ytc+i) % ysize)*xsize)+((xtc+j)%xsize)]]<<8);
-      if (img!=vsp0) tcopysprite((j<<4)+xofs,(i<<4)+yofs,16,16,img); }
+    { img=(char*)vsp0+(tileidx[map1[(((ytc+i) % ysize)*xsize)+((xtc+j)%xsize)]]<<8);
+      if (img!=(char*)vsp0) tcopysprite((j<<4)+xofs,(i<<4)+yofs,16,16,img); }
+  return(0);
 }
 
-DrawLayer1Speed(int xw, int yw)
+int DrawLayer1Speed(int xw, int yw)
 { char *img;
   int i,j,oxw,oyw,a;
 
 if (layer1trans==1)
 {
   DrawLayer1Trans(xw, yw);
-  return;
+  return(0);
 }
 
 if (layer1trans==2)
 {
   _DrawLayer1Trans(xw, yw);
-  return;
+  return(0);
 }
 
 if (layerc<3)
@@ -368,13 +376,14 @@ else
   for (i=0; i<14; i++)
    for (j=0; j<21; j++)
     { a=(tileidx[map1[(((ytc+i) % ysize)*xsize)+((xtc+j)%xsize)]]<<8);
-      img=vsp0+a;
-      if (img!=vsp0) tcopytile((j<<4)+xofs,(i<<4)+yofs,img,vspmask+a); }
+      img=(char*)vsp0+a;
+      if (img!=(char*)vsp0) tcopytile((j<<4)+xofs,(i<<4)+yofs,img,vspmask+a); }
+  return(0);
 }
 
 // ============================= Animation code ==========================
 
-AnimateTile(char i, int l)
+void AnimateTile(char i, int l)
 {
   switch (va0[i].mode)
   {
@@ -399,7 +408,7 @@ AnimateTile(char i, int l)
   }
 }
 
-animate(char i)
+void animate(char i)
 { int l;
 
   vadelay[i]=0;

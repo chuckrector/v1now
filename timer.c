@@ -3,14 +3,15 @@
 // Timer irq-hooking and PIT speed setting routines.
 
 #include <stdio.h>
-#include <dos.h>
-#include <sys/nearptr.h>
-#include <go32.h>
-#include <dpmi.h>
-#include <crt0.h>
-#include <pc.h>
+//#include <dos.h>
+// #include <sys/nearptr.h>
+// #include <go32.h>
+// #include <dpmi.h>
+// #include <crt0.h>
+// #include <pc.h>
 
 #include "engine.h" // for valloc()
+#include "vc.h"
 
 #define PIT0 0x40
 #define PIT1 0x41
@@ -24,13 +25,17 @@
 #define OCR2    0xA0
 #define IMR2    0xA1
 
-int _crt0_startup_flags = _CRT0_FLAG_NEARPTR;
-typedef __dpmi_paddr *PVI;
-static PVI oldhandler;
+// int _crt0_startup_flags = _CRT0_FLAG_NEARPTR;
+// typedef __dpmi_paddr *PVI;
+// static PVI oldhandler;
 unsigned int timer_count=0,timer=0,hooktimer=0;
 unsigned char an=0,tickctr=0,sec=0,min=0,hr=0;
 extern char playing;
 
+void disable() {}
+void enable() {}
+void outportb(int a, int b) {}
+/*
 PVI DJSetHandlerFunc(unsigned char irqno, void (*handler)(), int len)
 {
   PVI oldvect = (PVI) valloc(sizeof(__dpmi_paddr),"DJSetHandlerFunc:oldvect");
@@ -67,21 +72,22 @@ void DJSetHandlerAddr(unsigned char irqno, PVI handler)
          __dpmi_get_and_enable_virtual_interrupt_state();
          free(handler);
 }
+*/
 
-static SendEOI (unsigned char irqno)
+static void SendEOI (unsigned char irqno)
 {
   unsigned char ocr=(irqno>7) ? OCR2 : OCR1;
   unsigned char eoi=0x60|(irqno&7);
 
-         outportb(ocr,eoi);
-         if (irqno>7) outportb(OCR1,0x20);
+        //  outportb(ocr,eoi);
+        //  if (irqno>7) outportb(OCR1,0x20);
 }
 
-static newhandler(void)
+static void newhandler(void)
 {
          timer_count++;
          timer++;
-         if (playing) MD_Update();
+        //  if (playing) MD_Update();
          if (an) check_tileanimation();
          {
            tickctr++;
@@ -101,7 +107,7 @@ static newhandler(void)
 
 static void EndNewHandler() { }
 
-sethz(unsigned int hz)
+void sethz(unsigned int hz)
 { unsigned int pit0_set, pit0_value;
 
   disable();
@@ -116,7 +122,7 @@ sethz(unsigned int hz)
   enable();
 }
 
-restorehz()
+void restorehz()
 {
   disable();
   outportb(PITMODE, 0x34);
@@ -125,15 +131,15 @@ restorehz()
   enable();
 }
 
-timer_init()
+void timer_init()
 {
-   oldhandler = DJSetHandlerFunc(0, newhandler,
-                ((int) EndNewHandler) - ((int) newhandler));
+  //  oldhandler = DJSetHandlerFunc(0, newhandler,
+  //               ((int) EndNewHandler) - ((int) newhandler));
    sethz(100);
 }
 
-timer_close()
+void timer_close()
 {
-  DJSetHandlerAddr(0, oldhandler);
+  // DJSetHandlerAddr(0, oldhandler);
   restorehz();
 }

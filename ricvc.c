@@ -1,3 +1,10 @@
+#include <string.h>
+#include "vc.h"
+#include "vga.h"
+#include "menu.h"
+#include "menu2.h"
+#include "sound.h"
+
 /*  -- Ric's extensions to VCLIB.C --
  * Copyright (C)1998 Richard Lau
  *
@@ -8,7 +15,7 @@
  *       VCColorField(x1, y1, x2, y2, unsigned char *colortbl) (24/Apr/98)
  *       ExecuteStartUpScript(s)                   (25/Apr/98)
  *       VCAString(x1, y1, char *strng, align)     (30/Apr/98)
- * Added functions:                          
+ * Added functions:
  *       VCBox(x1,y1,x2,y2); (21/Apr/98)
  *       VCCharName(x, y, party.dat index, align); (21/Apr/98)
  *       VCItemName(x, y, items.dat index, align); (21/Apr/98)
@@ -49,35 +56,35 @@ extern char *speech;
 extern char *strbuf;
 extern unsigned int effectofstbl[1024];
 extern unsigned int startupofstbl[1024];
-extern tvar[26], varl[10];
-extern char *code,*basevc,*startupvc,*menuptr;
+extern unsigned int tvar[26], varl[10];
+extern char *code,*basevc,*startupvc;//,*menuptr;
 
 /* -- Function declarations -- */
-static grey(int width, int height, unsigned char *src, unsigned char *dest);
-static VChline(int x, int y, int x2, char c);
-static VCvline (int x, int y, int y2, char c);
-static VCColorField(int x1, int y1, int x2, int y2, unsigned char *colortbl);
-static VCborder(int x1, int y1, int x2, int y2);
-static VCBox();
-static VCAString(int x1, int y1, char *strng, int align);
-static VCCharName();
-static VCItemName();
-static VCItemDesc();
-static VCItemImage();
-static VCATextNum();        
-static VCSpc();
-static CallEffect();
-static CallScript();
-static BindKey();
-static TextMenu();
-static itemMenu();
-static equipMenu();
-static magicMenu();
-static statusScreen();
-static VCCr2();
+static void grey(int width, int height, unsigned char *src, unsigned char *dest);
+static void VChline(int x, int y, int x2, char c);
+static void VCvline (int x, int y, int y2, char c);
+static void VCColorField(int x1, int y1, int x2, int y2, unsigned char *colortbl);
+static void VCborder(int x1, int y1, int x2, int y2);
+static void VCBox();
+static void VCAString(int x1, int y1, char *strng, int align);
+static void VCCharName();
+static void VCItemName();
+static void VCItemDesc();
+static void VCItemImage();
+static void VCATextNum();
+static void VCSpc();
+static void CallEffect();
+static void CallScript();
+static void BindKey();
+static void TextMenu();
+static void itemMenu();
+static void equipMenu();
+static void magicMenu();
+static void statusScreen();
+static void VCCr2();
 static int ChooseChar();
 
-static grey(int width, int height, unsigned char *src, unsigned char *dest)
+static void grey(int width, int height, unsigned char *src, unsigned char *dest)
 /* -- ric: 24/Apr/98 -- */
 { int i,j;
   unsigned char r,g,b,c,newc;
@@ -93,7 +100,7 @@ static grey(int width, int height, unsigned char *src, unsigned char *dest)
           dest[(j*width)+i]=newc; }
 }
 
-static VCvline(int x, int y, int y2, char c)  /* -- ric: 30/Apr/98 -- */
+static void VCvline(int x, int y, int y2, char c)  /* -- ric: 30/Apr/98 -- */
 { int i,j;
   i=y2-y;
 
@@ -104,7 +111,7 @@ static VCvline(int x, int y, int y2, char c)  /* -- ric: 30/Apr/98 -- */
   } while (i);
 }
 
-static VCColorField(int x1, int y1, int x2, int y2, unsigned char *colortbl)
+static void VCColorField(int x1, int y1, int x2, int y2, unsigned char *colortbl)
 /* -- ric: 22/Apr/98 -- */
 /* Simulate the ColorField function on the VC layer.
  * Used wrong spelling so as to avoid confusing the Americans ;)
@@ -134,7 +141,7 @@ static VCColorField(int x1, int y1, int x2, int y2, unsigned char *colortbl)
 
 }
 
-static VCborder(int x1, int y1, int x2, int y2)
+static void VCborder(int x1, int y1, int x2, int y2)
 /* -- ric: 21/Apr/98 -- */
 /* Taken from MENU2.C and adapted for the VC layer
  */
@@ -158,7 +165,7 @@ static VCborder(int x1, int y1, int x2, int y2)
   VChline(x1+4,y2-3,x2-3,grey1);
 }
 
-static VCBox()  /* -- ric: 21/Apr/98 -- */
+static void VCBox()  /* -- ric: 21/Apr/98 -- */
 { int i, x1, y1, x2, y2;
   x1=ResolveOperand();
   y1=ResolveOperand();
@@ -167,18 +174,18 @@ static VCBox()  /* -- ric: 21/Apr/98 -- */
 
 //  for (i=y1; i<=y2; i++)
 //      VChline(x1,i,x2+1,bgcolor);
-  VCColorField(x1,y1,x2+1,y2+1,&menuxlatbl);
+  VCColorField(x1,y1,x2+1,y2+1,(unsigned char*)menuxlatbl);
   VCborder(x1, y1, x2, y2);
 }
 
-static VCAString(int x1, int y1, char *strng, int align)
+static void VCAString(int x1, int y1, char *strng, int align)
 /* -- ric: 30/Apr/98 -- */
 { if (align==1) x1-=(strlen(strng)<<2);
   if (align==2) x1-=(strlen(strng)<<3);
   VCprintstring(x1,y1,strng);
 }
 
-static VCCharName()  /* -- ric: 21/Apr/98 -- */
+static void VCCharName()  /* -- ric: 21/Apr/98 -- */
 { int x1,y1,i,align;
 
   x1=ResolveOperand();
@@ -188,27 +195,27 @@ static VCCharName()  /* -- ric: 21/Apr/98 -- */
   VCAString(x1,y1,pstats[i].name,align);
 }
 
-static VCItemName()  /* -- ric: 21/Apr/98 -- */
+static void VCItemName()  /* -- ric: 21/Apr/98 -- */
 { int x1,y1,i,align;
 
   x1=ResolveOperand();
   y1=ResolveOperand();
   i=ResolveOperand();
   align=ResolveOperand();
-  VCAString(x1,y1,items[i].name,align);
+  VCAString(x1,y1,(char*)items[i].name,align);
 }
 
-static VCItemDesc()  /* -- ric: 21/Apr/98 -- */
+static void VCItemDesc()  /* -- ric: 21/Apr/98 -- */
 { int x1,y1,i,align;
 
   x1=ResolveOperand();
   y1=ResolveOperand();
   i=ResolveOperand();
   align=ResolveOperand();
-  VCAString(x1,y1,items[i].desc,align);
+  VCAString(x1,y1,(char*)items[i].desc,align);
 }
 
-static VCItemImage()  /* -- ric: 22/Apr/98 -- */
+static void VCItemImage()  /* -- ric: 22/Apr/98 -- */
 { int x1,y1,i,gf;
   unsigned char gsimg[512];
   char *img;
@@ -217,17 +224,17 @@ static VCItemImage()  /* -- ric: 22/Apr/98 -- */
   y1=ResolveOperand();
   i=ResolveOperand();
   gf=ResolveOperand();
-  img=itemicons+(items[i].icon<<8);
+  img=(char*)itemicons+(items[i].icon<<8);
   if (gf)
-  { 
-    grey(16,16,img,&gsimg);
-    img=&gsimg;
+  {
+    grey(16,16,(unsigned char*)img,gsimg);
+    img=(char*)gsimg;
   }
 
   VCtcopysprite(x1,y1,16,16,img);
 }
 
-static VCATextNum()  /* -- ric: 24/Apr/98 -- */
+static void VCATextNum()  /* -- ric: 24/Apr/98 -- */
 { int x1,y1,i,align;
   char stringbuf[100];
 
@@ -235,11 +242,11 @@ static VCATextNum()  /* -- ric: 24/Apr/98 -- */
   y1=ResolveOperand();
   i=ResolveOperand();
   align=ResolveOperand();
-  dec_to_asciiz(i,&stringbuf);
-  VCAString(x1,y1,&stringbuf,align);
+  dec_to_asciiz(i,stringbuf);
+  VCAString(x1,y1,stringbuf,align);
 }
 
-static VCSpc()  /* -- ric: 24/Apr/98 -- */
+static void VCSpc()  /* -- ric: 24/Apr/98 -- */
 { int x1,y1,i,gf;
   unsigned char gsimg[1024];
   char *img;
@@ -250,15 +257,15 @@ static VCSpc()  /* -- ric: 24/Apr/98 -- */
   gf=ResolveOperand();
   img=speech+(1024*i);
   if (gf)
-  { 
-    grey(32,32,img,&gsimg);
-    img=&gsimg;
+  {
+    grey(32,32,(unsigned char*)img,gsimg);
+    img=(char*)gsimg;
   }
 
   VCtcopysprite(x1,y1,32,32,img);
 }
 
-static CallEffect ()  /* -- ric: 24/Apr/98 -- */
+static void CallEffect ()  /* -- ric: 24/Apr/98 -- */
 { char varcnt,i,*buf,*basebuf;
   unsigned short int t;
   int savetvar[26];
@@ -278,7 +285,7 @@ static CallEffect ()  /* -- ric: 24/Apr/98 -- */
   basevc=basebuf;
 }
 
-ExecuteStartUpScript(unsigned short int s) /* -- ric: 25/Apr/98 -- */
+void ExecuteStartUpScript(unsigned short int s) /* -- ric: 25/Apr/98 -- */
 {
   basevc=startupvc;
   code=startupvc+startupofstbl[s];
@@ -286,7 +293,7 @@ ExecuteStartUpScript(unsigned short int s) /* -- ric: 25/Apr/98 -- */
   ExecuteBlock();
 }
 
-static CallScript ()  /* -- ric: 25/Apr/98 -- */
+static void CallScript ()  /* -- ric: 25/Apr/98 -- */
 { char varcnt,i,*buf,*basebuf;
   unsigned short int t;
   int savetvar[26];
@@ -308,14 +315,14 @@ static CallScript ()  /* -- ric: 25/Apr/98 -- */
   basevc=basebuf;
 }
 
-static BindKey()      /* -- ric: 03/May/98 -- */         
+static void BindKey()      /* -- ric: 03/May/98 -- */
 { int ky, scrpt;
   ky=ResolveOperand();
   scrpt=ResolveOperand();
   key_map[ky].boundscript=scrpt;
 }
 
-static TextMenu()     /* -- ric: 03/May/98 -- */
+static void TextMenu()     /* -- ric: 03/May/98 -- */
 { char *buf1, *buf2;
   char *opt;
   int first=1,nv,p,ptr=0,ansave;
@@ -350,7 +357,7 @@ drawloop:
   }
   buf2=code;
   code=buf1;
-  tcopysprite(23+x1,21+y1+(ptr*10),16,16,&menuptr);
+  tcopysprite(23+x1,21+y1+(ptr*10),16,16,(char*)menuptr);
   vgadump();
   readcontrols();
   if (first==2) if (b1 || b2 || b4) goto drawloop;
@@ -385,31 +392,31 @@ drawloop:
   return;
 }
 
-static itemMenu()   /* -- ric: 03/May/98 -- */
+static void itemMenu()   /* -- ric: 03/May/98 -- */
 { int c;
   c=ResolveOperand();
   ItemMenu(c-1);
 }
 
-static equipMenu()   /* -- ric: 03/May/98 -- */
+static void equipMenu()   /* -- ric: 03/May/98 -- */
 { int c;
   c=ResolveOperand();
   EquipMenu(c-1);
 }
 
-static magicMenu()   /* -- ric: 03/May/98 -- */
+static void magicMenu()   /* -- ric: 03/May/98 -- */
 { int c;
   c=ResolveOperand();
   MagicMenu(c-1);
 }
 
-static statusScreen()/* -- ric: 03/May/98 -- */
+static void statusScreen()/* -- ric: 03/May/98 -- */
 { int c;
   c=ResolveOperand();
   StatusScreen(c);
 }
 
-static VCCr2()       /* -- ric: 03/May/98 -- */
+static void VCCr2()       /* -- ric: 03/May/98 -- */
 { int x1,y1,i,gf;
   unsigned char gsimg[9216];
   char *img;
@@ -418,17 +425,17 @@ static VCCr2()       /* -- ric: 03/May/98 -- */
   y1=ResolveOperand();
   i=ResolveOperand();
   gf=ResolveOperand();
-  img=chr2+(9216*(i-1));
+  img=(char*)chr2+(9216*(i-1));
   if (gf)
-  { 
-    grey(96,96,img,&gsimg);
-    img=&gsimg;
+  {
+    grey(96,96,(unsigned char*)img,gsimg);
+    img=(char*)gsimg;
   }
 
   VCtcopysprite(x1,y1,96,96,img);
 }
 
-static VCTextBox()     /* -- ric: 04/May/98 -- */
+static void VCTextBox()     /* -- ric: 04/May/98 -- */
 { char *buf1, *buf2;
   char *opt;
   int nv,p,ptr=0;
@@ -448,7 +455,7 @@ static VCTextBox()     /* -- ric: 04/May/98 -- */
   buf2=code;
   code=buf1;
 
-  VCColorField(x1,y1,x1+51+(width*8),y1+13+(nv*10),&menuxlatbl);
+  VCColorField(x1,y1,x1+51+(width*8),y1+13+(nv*10),(unsigned char*)menuxlatbl);
   VCborder(x1,y1,x1+50+(width*8),y1+12+(nv*10));
 
   for (p=0; p<nv; p++) {
@@ -456,7 +463,7 @@ static VCTextBox()     /* -- ric: 04/May/98 -- */
     GrabString(strbuf);
     VCprintstring(x1+25,y1+7+(p*10),opt);
   }
-  if (ptr) VCtcopysprite(7+x1,5+y1+((ptr-1)*10),16,16,&menuptr);
+  if (ptr) VCtcopysprite(7+x1,5+y1+((ptr-1)*10),16,16,(char*)menuptr);
 }
 
 static int ChooseChar(int x1, int y1)  /* -- ric: 25/Apr/98 -- */
@@ -477,7 +484,7 @@ drawloop:
         printstring(pstats[l].name);
       }
 
-  tcopysprite(x1+23,y1+20+(ptr*10),16,16,&menuptr);
+  tcopysprite(x1+23,y1+20+(ptr*10),16,16,(char*)menuptr);
   vgadump();
 
   readcontrols();

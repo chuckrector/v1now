@@ -1,4 +1,4 @@
-vcwritelayer(int i)
+void vcwritelayer(int i)
   {
 //   int i;
 //   i=ResolveOperand();

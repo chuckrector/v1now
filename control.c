@@ -3,6 +3,7 @@
 // Copyright (C)1997 BJ Eirich
 
 #include "keyboard.h"
+#include "pcx.h"
 
 /* -- ric: 03/May/98 -- */
 struct keyb_map {
@@ -25,7 +26,10 @@ int upb,downb,leftb,rightb;           // barriers for axis determination
 char kb1, kb2, kb3, kb4;              // keyboard definable controls.
 char jb1, jb2, jb3, jb4;              // joystick definable controls.
 
-initcontrols(char joystk)
+int calibrate();
+void readbuttons();
+
+void initcontrols(char joystk)
 { int i;
   j=joystk;
   if (j)
@@ -33,7 +37,9 @@ initcontrols(char joystk)
   for (i=0;i<128;i++) key_map[i].boundscript=0;    // no keys are bound yet
 }
 
-readb()
+void err(char* errmsg);
+
+void readb()
 {
   if (j) readbuttons();
   else { b1=0; b2=0; b3=0; b4=0; }
@@ -51,7 +57,9 @@ readb()
        ScreenShot(); }
 }
 
-readcontrols()
+extern void readjoystick();
+
+void readcontrols()
 { int i;
   if (j) readjoystick();
   else { b1=0; b2=0; b3=0; b4=0;
@@ -80,13 +88,13 @@ readcontrols()
        ScreenShot(); }
 }
 
-readbuttons()
+void readbuttons()
 { unsigned char b;
   char btbl[4];
 
-  b=inportb(0x201);                   // poll joystick port
-  b=b >> 4;                           // lose high nibble
-  b=b ^ 15;                           // flip mask bits
+  // b=inportb(0x201);                   // poll joystick port
+  // b=b >> 4;                           // lose high nibble
+  // b=b ^ 15;                           // flip mask bits
 
   btbl[0]=b & 1;                           // mask button status
   btbl[1]=b & 2;
@@ -100,49 +108,49 @@ readbuttons()
 
 }
 
-getcoordinates()
+void getcoordinates()
 // Gets raw, machine dependant coordinates from the joystick.
 {
   foundx=0;
   foundy=0;
 
-  asm("cli                            \n\t"  // disable interrupts
-      "movw $513, %%dx                \n\t"  // start joystick timer
-      "outb %%al, %%dx                \n\t"
-      "xorl %%ecx, %%ecx              \n\t"  // clear out counter
-      "movl $2, %%ebx                 \n\t"  // number of axii left to report
-"joyloop:                             \n\t"
-      "incl %%ecx                     \n\t"  // increment counter
-      "cmpl $65500, %%ecx             \n\t"  // time out?
-      "je j_end                       \n\t"
-      "inb %%dx, %%al                 \n\t"  // poll joystick status
-      "cmpb $1, _foundx               \n\t"
-      "je search_y                    \n\t"
+//   asm("cli                            \n\t"  // disable interrupts
+//       "movw $513, %%dx                \n\t"  // start joystick timer
+//       "outb %%al, %%dx                \n\t"
+//       "xorl %%ecx, %%ecx              \n\t"  // clear out counter
+//       "movl $2, %%ebx                 \n\t"  // number of axii left to report
+// "joyloop:                             \n\t"
+//       "incl %%ecx                     \n\t"  // increment counter
+//       "cmpl $65500, %%ecx             \n\t"  // time out?
+//       "je j_end                       \n\t"
+//       "inb %%dx, %%al                 \n\t"  // poll joystick status
+//       "cmpb $1, _foundx               \n\t"
+//       "je search_y                    \n\t"
 
-      "test $1, %%al                  \n\t"  // is this axis in?
-      "jnz j0                         \n\t"
-      "movl %%ecx, _jx                \n\t"  // if so, store coordinate
-      "movl $1, _foundx               \n\t"  // say we already got it
-      "decl %%ebx                     \n\t"  // one less axis to go.
-      "jz j_end                       \n\t"
+//       "test $1, %%al                  \n\t"  // is this axis in?
+//       "jnz j0                         \n\t"
+//       "movl %%ecx, _jx                \n\t"  // if so, store coordinate
+//       "movl $1, _foundx               \n\t"  // say we already got it
+//       "decl %%ebx                     \n\t"  // one less axis to go.
+//       "jz j_end                       \n\t"
 
-"j0:                                  \n\t"
-      "cmp $1, _foundy                \n\t"
-      "je joyloop                     \n\t"
-"search_y:                            \n\t"
-      "test $2, %%al                  \n\t"  // is the Y axis in?
-      "jnz joyloop                    \n\t"
-      "movl %%ecx, _jy                \n\t"  // if so, handle it.
-      "movl $1, _foundy               \n\t"
-      "decl %%ebx                     \n\t"
-      "jz j_end                       \n\t"  // are we done?
-      "jmp joyloop                    \n\t"
+// "j0:                                  \n\t"
+//       "cmp $1, _foundy                \n\t"
+//       "je joyloop                     \n\t"
+// "search_y:                            \n\t"
+//       "test $2, %%al                  \n\t"  // is the Y axis in?
+//       "jnz joyloop                    \n\t"
+//       "movl %%ecx, _jy                \n\t"  // if so, handle it.
+//       "movl $1, _foundy               \n\t"
+//       "decl %%ebx                     \n\t"
+//       "jz j_end                       \n\t"  // are we done?
+//       "jmp joyloop                    \n\t"
 
-"j_end:                               \n\t"
-      "sti                            \n\t"  // turn interrupts back on
-      :
-      :
-      : "eax","ebx","ecx","edx","cc" );
+// "j_end:                               \n\t"
+//       "sti                            \n\t"  // turn interrupts back on
+//       :
+//       :
+//       : "eax","ebx","ecx","edx","cc" );
 }
 
 int calibrate()
@@ -162,7 +170,7 @@ int calibrate()
   return 1;
 }
 
-readjoystick()
+void readjoystick()
 {
   readbuttons();
   getcoordinates();
