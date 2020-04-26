@@ -1,19 +1,21 @@
 #ifndef VC_H
 #define VC_H
 
-extern char* code;
-extern unsigned char* vcdatabuf;
+#include <stdio.h>
+
+extern char *code;
+extern unsigned char *vcdatabuf;
 extern unsigned int magicofstbl[1024];
-extern char* magicvc;
+extern char *magicvc;
 extern unsigned int effectofstbl[1024];
-extern char* effectvc;
+extern char *effectvc;
 extern unsigned int startupofstbl[1024];
-extern char* startupvc;
+extern char *startupvc;
 extern char killvc;
 extern unsigned int varl[10];
-extern char* basevc;
+extern char *basevc;
 extern unsigned int tvar[26];
-extern char* mapvc;
+extern char *mapvc;
 extern unsigned int scriptofstbl[1024];
 extern int vcbufm;
 
@@ -73,9 +75,9 @@ extern void ExecuteHookedScript(unsigned short int s);
 extern void ExecuteMagicEffect(unsigned short int s);
 extern void ExecuteScript(unsigned short int s);
 extern unsigned char GrabC();
-extern void GrabString(char* str);
+extern void GrabString(char *str);
 extern void InitVCMem();
-extern void LoadVC(FILE* f);
+extern void LoadVC(FILE *f);
 extern unsigned int ResolveOperand();
 extern void StartupScript();
 

@@ -4,15 +4,15 @@
 #include <stdio.h>
 #include <string.h> // strlen
 
-#include "main.h"
 #include "control.h"
 #include "engine.h"
 #include "keyboard.h"
+#include "main.h"
+#include "menu2.h"
+#include "render.h"
+#include "sound.h"
 #include "timer.h"
 #include "vga.h"
-#include "sound.h"
-#include "render.h"
-#include "menu2.h"
 
 #define bgcolor 154
 #define grey1 14

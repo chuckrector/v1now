@@ -8,9 +8,9 @@ extern unsigned short int depth;
 extern FILE *pcxf;
 extern unsigned int vidoffset;
 
-extern void loadpcx(char* fname, unsigned char* dest);
-extern void LoadPCXHeaderNP(char* fname);
-extern void ReadPCXLine(unsigned char* dest);
+extern void loadpcx(char *fname, unsigned char *dest);
+extern void LoadPCXHeaderNP(char *fname);
+extern void ReadPCXLine(unsigned char *dest);
 extern void ScreenShot();
 
 #endif

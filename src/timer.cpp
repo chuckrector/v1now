@@ -2,16 +2,9 @@
 // Copyright (C)1997 BJ Eirich
 // Timer irq-hooking and PIT speed setting routines.
 
-#include <stdio.h>
-//#include <dos.h>
-// #include <sys/nearptr.h>
-// #include <go32.h>
-// #include <dpmi.h>
-// #include <crt0.h>
-// #include <pc.h>
-
-#include "engine.h" // for valloc()
+#include "engine.h"
 #include "vc.h"
+#include <stdio.h>
 
 #define PIT0 0x40
 #define PIT1 0x41
@@ -19,21 +12,30 @@
 #define PITMODE 0x43
 #define PITCONST 1193180L
 
-#define OCR1    0x20
-#define IMR1    0x21
+#define OCR1 0x20
+#define IMR1 0x21
 
-#define OCR2    0xA0
-#define IMR2    0xA1
+#define OCR2 0xA0
+#define IMR2 0xA1
 
 // int _crt0_startup_flags = _CRT0_FLAG_NEARPTR;
 // typedef __dpmi_paddr *PVI;
 // static PVI oldhandler;
-unsigned int timer_count=0,timer=0,hooktimer=0;
-unsigned char an=0,tickctr=0,sec=0,min=0,hr=0;
+unsigned int timer_count = 0, timer = 0, hooktimer = 0;
+unsigned char an = 0, tickctr = 0, sec = 0, min = 0, hr = 0;
 
-void disable() {}
-void enable() {}
-void outportb(int a, int b) {}
+void
+disable()
+{
+}
+void
+enable()
+{
+}
+void
+outportb(int a, int b)
+{
+}
 /*
 PVI DJSetHandlerFunc(unsigned char irqno, void (*handler)(), int len)
 {
@@ -73,55 +75,71 @@ void DJSetHandlerAddr(unsigned char irqno, PVI handler)
 }
 */
 
-static void SendEOI (unsigned char irqno)
+static void
+SendEOI(unsigned char irqno)
 {
-  unsigned char ocr=(irqno>7) ? OCR2 : OCR1;
-  unsigned char eoi=0x60|(irqno&7);
+  unsigned char ocr = (irqno > 7) ? OCR2 : OCR1;
+  unsigned char eoi = 0x60 | (irqno & 7);
 
-        //  outportb(ocr,eoi);
-        //  if (irqno>7) outportb(OCR1,0x20);
+  //  outportb(ocr,eoi);
+  //  if (irqno>7) outportb(OCR1,0x20);
 }
 
-static void newhandler(void)
+static void
+newhandler(void)
 {
-         timer_count++;
-         timer++;
-        //  if (playing) MD_Update();
-         if (an) check_tileanimation();
-         {
-           tickctr++;
-           if (tickctr == 100)
-              { tickctr=0;
-                sec++; }
-           if (sec == 60)
-              { min++;
-                sec=0; }
-           if (min == 60)
-              { hr++;
-                 min=0; }
-         }
-         if (hooktimer) ExecuteHookedScript(hooktimer);
-         SendEOI(0);
+  timer_count++;
+  timer++;
+  //  if (playing) MD_Update();
+  if (an)
+    check_tileanimation();
+  {
+    tickctr++;
+    if (tickctr == 100)
+    {
+      tickctr = 0;
+      sec++;
+    }
+    if (sec == 60)
+    {
+      min++;
+      sec = 0;
+    }
+    if (min == 60)
+    {
+      hr++;
+      min = 0;
+    }
+  }
+  if (hooktimer)
+    ExecuteHookedScript(hooktimer);
+  SendEOI(0);
 }
 
-static void EndNewHandler() { }
+static void
+EndNewHandler()
+{
+}
 
-void sethz(unsigned int hz)
-{ unsigned int pit0_set, pit0_value;
+void
+sethz(unsigned int hz)
+{
+  unsigned int pit0_set, pit0_value;
 
   disable();
 
   outportb(PITMODE, 0x34);
-  pit0_value=PITCONST / hz;
-  pit0_set=(pit0_value & 0x00ff);
+  pit0_value = PITCONST / hz;
+  pit0_set = (pit0_value & 0x00ff);
   outportb(PIT0, pit0_set);
-  pit0_set=(pit0_value >> 8);
+  pit0_set = (pit0_value >> 8);
   outportb(PIT0, pit0_set);
 
   enable();
 }
 
-void restorehz()
+void
+restorehz()
 {
   disable();
   outportb(PITMODE, 0x34);
@@ -130,14 +148,16 @@ void restorehz()
   enable();
 }
 
-void timer_init()
+void
+timer_init()
 {
   //  oldhandler = DJSetHandlerFunc(0, newhandler,
   //               ((int) EndNewHandler) - ((int) newhandler));
-   sethz(100);
+  sethz(100);
 }
 
-void timer_close()
+void
+timer_close()
 {
   // DJSetHandlerAddr(0, oldhandler);
   restorehz();

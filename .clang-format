@@ -1,0 +1,12 @@
+AlignAfterOpenBracket: Align
+ColumnLimit: 80
+BreakBeforeBraces: Allman
+BinPackArguments: false
+BinPackParameters: false
+AlignAfterOpenBracket: AlwaysBreak
+ExperimentalAutoDetectBinPacking: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AlwaysBreakAfterDefinitionReturnType: All
+IndentCaseLabels: true
+BraceWrapping:
+    AfterControlStatement: true
