@@ -183,7 +183,7 @@ hline(int x, int y, int x2, char c)
 }
 
 void
-box(int x, int y, int x2, int y2, char color)
+box(int x, int y, int x2, int y2, unsigned char color)
 {
   int i;
 
@@ -718,7 +718,7 @@ gotoxy(int x, int y)
 }
 
 void
-printstring(char *str)
+printstring(const char *str)
 {
   int i;
   char c;
@@ -741,7 +741,7 @@ mainloop:
 }
 
 void
-VCprintstring(int xx, int yy, char *str)
+VCprintstring(int xx, int yy, const char *str)
 {
   int i;
   char c;
@@ -764,7 +764,7 @@ mainloop:
 }
 
 void
-bigprintstring(char *str)
+bigprintstring(const char *str)
 {
   int i;
   char c;
@@ -822,7 +822,7 @@ dec_to_asciiz(int num, char *buf)
 }
 
 void
-textwindow(char portrait, char *str1, char *str2, char *str3)
+textwindow(char portrait, const char *str1, const char *str2, const char *str3)
 {
   tcopysprite(20, 114, 32, 32, speech + (portrait * 1024));
   putbox();

@@ -156,18 +156,18 @@ extern int vspm;
 extern char qabort;
 extern char moneycheat;
 
-extern void *valloc(int amount, char *whatfor);
+extern void *valloc(int amount, const char *whatfor);
 extern void addcharacter(int i);
 extern void allocbuffers();
 extern void check_tileanimation();
 extern void lastmove(char n);
-extern void load_map(char *fname);
+extern void load_map(const char *fname);
 extern int ObstructionAt(int tx, int ty);
 extern void process_controls();
 extern void process_entities();
-extern void SaveGame(char *fn);
+extern void SaveGame(const char *fn);
 extern void startfollow();
-extern void startmap(char *fname);
+extern void startmap(const char *fname);
 extern void UpdateEquipStats();
 extern void vfree(void *thismem);
 

@@ -165,7 +165,7 @@ VCBox() /* -- ric: 21/Apr/98 -- */
 }
 
 void
-VCAString(int x1, int y1, char *strng, int align)
+VCAString(int x1, int y1, const char *strng, int align)
 /* -- ric: 30/Apr/98 -- */
 {
   if (align == 1)

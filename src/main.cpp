@@ -20,7 +20,7 @@ char *strbuf;
 unsigned char *speech;
 
 int
-Exist(char *fname)
+Exist(const char *fname)
 {
   FILE *tempf;
 
@@ -37,7 +37,7 @@ Exist(char *fname)
 }
 
 void
-err(char *ermsg)
+err(const char *ermsg)
 {
   keyboard_close();
   stopsound();
@@ -152,7 +152,7 @@ InitPStats()
 }
 
 void
-StartNewGame(char *startp)
+StartNewGame(const char *startp)
 {
   int i;
 
@@ -184,7 +184,7 @@ StartNewGame(char *startp)
 }
 
 void
-LoadGame(char *fn)
+LoadGame(const char *fn)
 {
   FILE *f;
   char i, b;

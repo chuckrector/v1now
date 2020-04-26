@@ -6,9 +6,6 @@
 #include "engine.h"
 #include "vclib.h"
 #include <stdio.h>
-// #include "keyboard.h"
-// #include "vclib.h"
-// #include "vga.h"
 
 char *magicvc;
 char *mapvc; // MAP VC code buffer

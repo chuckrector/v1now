@@ -1778,8 +1778,6 @@ PutEquipPreview(char c, char ptr)
   }
 }
 
-void PurchaseItem(char c, char i); // lol
-void BuyOrBuyEquip(char c, char ptr);
 void
 BuyItem(char ptr)
 {
@@ -2016,7 +2014,6 @@ PutMagicBox(char l)
   }
 }
 
-void SellCharMagic(char c);
 void
 MSellMenu()
 {
@@ -2388,7 +2385,6 @@ MPutBuyCharBox(char ptr, char p)
       p);
 }
 
-void BuyMagic(char ptr);
 void
 MBuyMenu()
 {
@@ -2511,7 +2507,6 @@ drawloop:
   }
 }
 
-void PurchaseMagic(char c, char i); // lol
 void
 BuyMagic(char ptr)
 {

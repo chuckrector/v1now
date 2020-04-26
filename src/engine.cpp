@@ -74,7 +74,7 @@ unsigned short int ny = 0;
 // ============================ Code ============================
 
 void *
-valloc(int amount, char *whatfor)
+valloc(int amount, const char *whatfor)
 /* -- ric: 10/May/98 --
  * Well actually this is aen's code to replace malloc. It'll help
  * with debugging :)
@@ -242,7 +242,7 @@ LoadCHRList()
 }
 
 void
-load_map(char *fname)
+load_map(const char *fname)
 {
   unsigned char b;
   int i;
@@ -959,7 +959,7 @@ CreateSaveImage(unsigned char *buf)
 }
 
 void
-SaveGame(char *fn)
+SaveGame(const char *fn)
 {
   FILE *f;
   unsigned char cz;
@@ -990,7 +990,7 @@ SaveGame(char *fn)
 }
 
 void
-startmap(char *fname)
+startmap(const char *fname)
 {
   if (qabort)
   {

@@ -78,7 +78,7 @@ void
 drawchar(int i, int xw, int yw)
 {
   unsigned char *img;
-  unsigned fr;
+  unsigned fr = 0;
   int dx, dy, drawmode = 0;
 
   dx = party[i].x - xw + 16;

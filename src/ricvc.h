@@ -14,7 +14,7 @@ extern void itemMenu();
 extern void magicMenu();
 extern void statusScreen();
 extern void TextMenu();
-extern void VCAString(int x1, int y1, char *strng, int align);
+extern void VCAString(int x1, int y1, const char *strng, int align);
 extern void VCATextNum();
 extern void VCborder(int x1, int y1, int x2, int y2);
 extern void VCBox();
