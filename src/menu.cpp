@@ -22,6 +22,8 @@ int reap;
 char menuactive = 1;
 char whoisptr = 0;
 
+char bcs = 0;
+
 void
 border(int x, int y, int x2, int y2)
 {
@@ -918,8 +920,6 @@ drawloop:
 
 // Shop code
 
-char bcs = 0;
-
 void
 PutBuySellBox(char p)
 {
@@ -1453,7 +1453,6 @@ PutBuyCharBox(char ptr, char p)
       p);
 }
 
-void BuyItem(char ptr);
 void
 BuyMenu()
 {

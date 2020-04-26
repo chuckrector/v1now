@@ -4,6 +4,7 @@
 
 #include "control.h"
 #include "keyboard.h"
+#include "main.h"
 #include "pcx.h"
 
 struct keyb_map key_map[128]; // for recording bound keys
@@ -42,8 +43,6 @@ initcontrols(char joystk)
     key_map[i].boundscript = 0; // no keys are bound yet
   }
 }
-
-void err(char *errmsg);
 
 void
 readb()

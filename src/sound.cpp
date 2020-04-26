@@ -2,6 +2,7 @@
 // RPG <-> MikMod interfacing code
 // Copyright (C)1997 BJ Eirich
 
+#include "sound.h"
 #include "control.h"
 #include "engine.h"
 #include "keyboard.h"
@@ -13,6 +14,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DMODE_STEREO 0
+#define DMODE_16BITS 1
+#define DMODE_INTERP 2
+
 unsigned char mp_volume;
 int md_device;
 int md_mixfreq;
@@ -20,9 +25,7 @@ int md_dmabufsize;
 int md_mode;
 int mp_loop;
 int md_numchn;
-#define DMODE_STEREO 0
-#define DMODE_16BITS 1
-#define DMODE_INTERP 2
+int lastvol;
 
 void
 delay(int n)
@@ -201,8 +204,6 @@ parseloop:
   fclose(s);
 }
 
-int lastvol;
-
 void
 sound_init()
 // Incidently, sound_init() also initializes the control interface, since
@@ -289,8 +290,6 @@ sound_freesfx()
   //     MW_FreeWav(sfx[i]);
 }
 
-void stopsound();
-void playeffect(char efc);
 void
 playsong(char *sngnme)
 {

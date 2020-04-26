@@ -80,5 +80,6 @@ extern void InitVCMem();
 extern void LoadVC(FILE *f);
 extern unsigned int ResolveOperand();
 extern void StartupScript();
+extern int ProcessOperand();
 
 #endif

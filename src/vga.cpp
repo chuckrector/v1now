@@ -18,6 +18,12 @@ char waitvrt;
 char fade = 1;
 char cancelfade = 0;
 
+unsigned char vergepal[768];    // VERGE main palette
+unsigned char menuxlatbl[256];  // Menu transparencyfield (blue)
+unsigned char greyxlatbl[256];  // Grey transparencyfield
+unsigned char scrnxlatbl[256];  // screen transparencyfield
+unsigned char *transparencytbl; // full transparency table (64k)
+
 int
 abs(int x)
 {
@@ -70,7 +76,6 @@ set_intensity(unsigned int n)
   set_palette(pal2);
 }
 
-void PreCalc_TransparencyFields();
 void
 initvga()
 {
@@ -434,12 +439,6 @@ outloop:
 }
 
 // Tranparency routines
-
-unsigned char vergepal[768];    // VERGE main palette
-unsigned char menuxlatbl[256];  // Menu transparencyfield (blue)
-unsigned char greyxlatbl[256];  // Grey transparencyfield
-unsigned char scrnxlatbl[256];  // screen transparencyfield
-unsigned char *transparencytbl; // full transparency table (64k)
 
 unsigned char
 match(char r, char g, char b)

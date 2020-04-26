@@ -200,7 +200,6 @@ setdrawchar(unsigned char i)
   numdraw++;
 }
 
-void drawchars(int xw, int yw);
 void
 drawcharacters(int xw, int yw)
 {
@@ -305,6 +304,7 @@ drawvclayer()
     tcopysprite(16, 16, 320, 200, vcscreen1);
   }
 }
+
 void
 drawvclayer2()
 {
@@ -322,7 +322,6 @@ drawvclayer2()
   }
 }
 
-void DrawLayer0(int xw, int yw);
 void
 drawmap()
 {

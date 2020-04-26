@@ -58,5 +58,6 @@ extern void
 VCtcopysprite(int x, int y, int width, int height, unsigned char *spr);
 extern void vgadump();
 extern void vline(int x, int y, int y2, char c);
+extern void PreCalc_TransparencyFields();
 
 #endif

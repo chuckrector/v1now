@@ -152,7 +152,6 @@ Zone(int cx, int cy)
   return mapp[((cy * xsize) + cx)] >> 1;
 }
 
-void ProcessEntity(int i);
 void
 ProcessSpeedAdjEntity(int i)
 {

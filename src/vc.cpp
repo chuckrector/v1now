@@ -225,7 +225,6 @@ ProcessVar2Assign()
   }
 }
 
-int ProcessOperand();
 unsigned int
 ResolveOperand()
 {
@@ -376,7 +375,6 @@ ProcessIf()
   }
 }
 
-void ExecuteBlock();
 void
 ProcessFor0()
 {

@@ -48,5 +48,6 @@ extern void SellMenu();
 extern void StatusScreen(char cz);
 extern void SystemMenu();
 extern void tmenubox(int x, int y, int x2, int y2);
+extern void BuyItem(char ptr);
 
 #endif // MENU_H
