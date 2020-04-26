@@ -88,7 +88,7 @@ valloc(int amount, char *whatfor)
   tmp = (char *)malloc(amount);
   if (!tmp)
   {
-    sprintf(debug_buf, "Failed allocating %ld bytes for %s.", amount, whatfor);
+    sprintf(debug_buf, "Failed allocating %d bytes for %s.", amount, whatfor);
     err(debug_buf);
   }
   memset(tmp, 0, amount); // -- aen: 30/May/98; clear allocated mem
@@ -99,7 +99,9 @@ void
 vfree(void *thismem)
 {
   if (thismem)
+  {
     free(thismem);
+  }
   thismem = NULL;
 }
 
@@ -146,11 +148,15 @@ addcharacter(int i)
   partyidx[numchars - 1] = i;
   p = fopen("PARTY.DAT", "r");
   if (!p)
+  {
     err("Fatal error: PARTY.DAT not found");
+  }
   fscanf(p, "%s", strbuf);
   tchars = atoi(strbuf);
   if (i > atoi(strbuf))
+  {
     err("addcharacter(): index out of range");
+  }
   for (b = 1; b < i; b++)
   {
     fscanf(p, "%s", strbuf);
@@ -201,7 +207,9 @@ addcharacter(int i)
   lastmoves[5] = 0;
   chrf = fopen(pstats[i - 1].chrfile, "rb");
   if (!chrf)
+  {
     err("addcharacter(): CHR file not found");
+  }
   fread(chrs + ((numchars - 1) * 15360), 1, 15360, chrf);
   fclose(chrf);
 
@@ -209,7 +217,9 @@ addcharacter(int i)
   fclose(p);
   chrf = fopen(strbuf, "rb");
   if (!chrf)
+  {
     err("addcharacter(): CR2 file not found");
+  }
   fread(chr2 + ((numchars - 1) * 9216), 1, 9216, chrf);
   fclose(chrf);
 }
@@ -221,12 +231,14 @@ LoadCHRList()
   FILE *f;
 
   for (i = 0; i < 20; i++)
+  {
     if (strlen(chrlist[i].fname))
     {
       f = fopen(chrlist[i].fname, "rb");
       fread(chrs + ((i + 5) * 15360), 30, 512, f);
       fclose(f);
     }
+  }
 }
 
 void
@@ -239,11 +251,15 @@ load_map(char *fname)
 
   map = fopen(fname, "rb");
   if (!map)
+  {
     err("Could not open specified MAP file.");
+  }
 
   fread(&b, 1, 1, map);
   if (b != 4)
+  {
     err("*error* Incorrect MAP version.");
+  }
 
   fread(vsp0name, 1, 13, map);
   fread(musname, 1, 13, map);
@@ -270,7 +286,9 @@ load_map(char *fname)
 
   fread(&b, 1, 1, map);
   if (b)
+  {
     err("*error* MAP compression not yet supported.");
+  }
 
   fread(map0, 1, 27, map); // skip buffer
 
@@ -315,12 +333,16 @@ load_map(char *fname)
   fclose(map);
 
   if (strlen(musname))
+  {
     playsong(musname);
+  }
 
   // load the .VSP file
   vsp = fopen(vsp0name, "rb");
   if (!vsp)
+  {
     err("Could not open specified VSP file.");
+  }
   fseek(vsp, 2, 0);
   fread(pal, 1, 768, vsp);
   fread(&numtiles, 1, 2, vsp);
@@ -335,10 +357,14 @@ load_map(char *fname)
   fclose(vsp);
 
   for (i = 0; i < 2048; i++)
+  {
     tileidx[i] = i;
+  }
 
   if (vspspeed)
+  {
     CalcVSPMask();
+  }
 
   if (usenxy)
   {
@@ -403,7 +429,9 @@ process_stepzone()
     lz = cz;
   }
   if (!zone[cz].percent)
+  {
     return;
+  }
   if (zonedelay < zone[cz].delay)
   {
     zonedelay++;
@@ -527,13 +555,17 @@ Activate()
 
   t = EntityAt(tx, ty);
   if (t)
+  {
     if (!party[t].activmode && party[t].actscript)
     {
       if (party[t].face)
+      {
         party[t].facing = InvFace();
+      }
       ExecuteScript(party[t].actscript);
       return;
     }
+  }
 
   // Check adjacent zones.
   cz = mapp[((ty * xsize) + tx)] >> 1;
@@ -548,7 +580,9 @@ int
 ObstructionAt(int tx, int ty)
 {
   if ((mapp[((ty)*xsize) + tx] & 1) == 1)
+  {
     return 1;
+  }
   return 0;
 }
 
@@ -558,11 +592,17 @@ process_entities()
   int i;
 
   for (i = 5; i < entities; i++)
+  {
     ProcessSpeedAdjEntity(i);
+  }
 
   if (autoent)
+  {
     for (i = 95; i < 95 + numchars; i++)
+    {
       ProcessSpeedAdjEntity(i);
+    }
+  }
 }
 
 void
@@ -593,7 +633,9 @@ ProcessControls()
     }
   }
   if (party[0].speed < 5)
+  {
     process_controls();
+  }
   switch (party[0].speed)
   {
     case 5:
@@ -625,38 +667,68 @@ process_controls()
     xtc = party[0].x / 16;
     ytc = party[0].y / 16;
     if ((mapp[((ytc + 1) * xsize) + xtc] & 1) == 1)
+    {
       b = 0;
+    }
     else
+    {
       b = 1;
+    }
     if ((mapp[((ytc - 1) * xsize) + xtc] & 1) == 1)
+    {
       t = 0;
+    }
     else
+    {
       t = 1;
+    }
     if ((mapp[(ytc * xsize) + ((party[0].x + 17) / 16)] & 1) == 1)
+    {
       r = 0;
+    }
     else
+    {
       r = 1;
+    }
     if ((mapp[(ytc * xsize) + ((party[0].x - 15) / 16)] & 1) == 1)
+    {
       l = 0;
+    }
     else
+    {
       l = 1;
+    }
 
     if (xtc == 0)
+    {
       l = 0;
+    }
     if (ytc == 0)
+    {
       t = 0;
+    }
     if (xtc == xsize - 1)
+    {
       r = 0; /* -- ric: 28/Apr/98 -- */
+    }
     if (ytc == ysize - 1)
+    {
       b = 0; /* -- ric: 28/Apr/98 -- */
+    }
 
     readcontrols();
     if (b1)
+    {
       Activate();
+    }
     if (b3)
+    {
       SystemMenu();
+    }
     if (b4)
+    {
       MainMenu();
+    }
 
     for (i = 0; i < 128; i++)
     { /* -- ric: 03/May/98 -- */
@@ -672,13 +744,21 @@ process_controls()
     ytc = party[0].y / 16;
 
     if (right)
+    {
       party[0].facing = 2;
+    }
     if (down)
+    {
       party[0].facing = 0;
+    }
     if (left)
+    {
       party[0].facing = 3;
+    }
     if (up)
+    {
       party[0].facing = 1;
+    }
 
     if ((right) && (r) && !EntityAt(xtc + 1, ytc))
     {
@@ -761,7 +841,9 @@ process_controls()
         party[i].framectr++;
       }
       if (party[i].framectr == 80)
+      {
         party[i].framectr = 0;
+      }
     }
     if (!party[0].movcnt)
     {
@@ -779,7 +861,9 @@ check_tileanimation()
   for (i = 0; i < 100; i++)
   {
     if ((va0[i].delay) && (va0[i].delay < vadelay[i]))
+    {
       animate(i);
+    }
     vadelay[i]++;
   }
 }
@@ -826,9 +910,13 @@ game_ai()
   ProcessControls();
   process_entities();
   if (keyboard_map[SCAN_CTRL] && speed)
+  {
     ProcessControls();
+  }
   if (moneycheat)
+  {
     gp = 100000;
+  }
   check_tileanimation();
 }
 
@@ -837,21 +925,37 @@ CreateSaveImage(unsigned char *buf)
 {
   memcpy(buf, chrs, 512);
   if (numchars > 1)
+  {
     memcpy(buf + 512, chrs + 15360, 512);
+  }
   else
+  {
     memset(buf + 512, 0, 512);
+  }
   if (numchars > 2)
+  {
     memcpy(buf + 1024, chrs + 30720, 512);
+  }
   else
+  {
     memset(buf + 1024, 0, 512);
+  }
   if (numchars > 3)
+  {
     memcpy(buf + 1536, chrs + 46080, 512);
+  }
   else
+  {
     memset(buf + 1536, 0, 512);
+  }
   if (numchars > 4)
+  {
     memcpy(buf + 2048, chrs + 61440, 512);
+  }
   else
+  {
     memset(buf + 2048, 0, 512);
+  }
 }
 
 void
@@ -889,7 +993,9 @@ void
 startmap(char *fname)
 {
   if (qabort)
+  {
     return;
+  }
 
   set_intensity(0);
   load_map(fname);
@@ -919,5 +1025,7 @@ main_loop:
   }
 
   if (!qabort)
+  {
     goto main_loop;
+  }
 }

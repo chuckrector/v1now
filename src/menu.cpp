@@ -146,7 +146,9 @@ WhoIs(int i)
   char c, first = 1, ec = 0;
 
   if (numchars == 1)
+  {
     return 1;
+  }
   playeffect(1);
 
 drawloop:
@@ -165,29 +167,45 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
+    {
       return ec;
+    }
+  }
   if (first && !b1 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     whoisptr++;
     if (whoisptr == numchars)
+    {
       whoisptr = 0;
+    }
     playeffect(0);
     first = 1;
   }
   if (up)
   {
     if (!whoisptr)
+    {
       whoisptr = numchars - 1;
+    }
     else
+    {
       whoisptr--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -198,7 +216,9 @@ drawloop:
     first = 1;
   }
   while (!b2 && !b1)
+  {
     goto drawloop;
+  }
   while (b2 || b1)
   {
     first = 2;
@@ -231,32 +251,52 @@ drawloop:
     flash = 0;
   }
   else
+  {
     flash++;
+  }
   vgadump();
   readcontrols();
 
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (up)
   {
     if (mp)
+    {
       mp--;
+    }
     else
+    {
       mp = numchars - 1;
+    }
     if ((t1 == 1) && (mp == cnt1))
     {
       if (mp)
+      {
         mp--;
+      }
       else
+      {
         mp = numchars - 1;
+      }
     }
     playeffect(0);
     first = 1;
@@ -265,13 +305,21 @@ drawloop:
   if (down)
   {
     if (mp < (numchars - 1))
+    {
       mp++;
+    }
     else
+    {
       mp = 0;
+    }
     if ((t1 == 1) && (mp == cnt1))
+    {
       mp++;
+    }
     if (mp == numchars)
+    {
       mp = 0;
+    }
     playeffect(0);
     first = 1;
   }
@@ -284,9 +332,13 @@ drawloop:
     {
       cnt1 = mp;
       if (mp < (numchars - 1))
+      {
         mp++;
+      }
       else
+      {
         mp = 0;
+      }
       first = 1;
     }
 
@@ -302,12 +354,16 @@ drawloop:
 
       numchars = 0; // Here we reload CHRs
       for (cnt1 = 0; cnt1 < t1; cnt1++)
+      {
         addcharacter(partyidx[cnt1]);
+      }
       return;
     }
   }
   while (!b2)
+  {
     goto drawloop;
+  }
   if (t1 == 1)
   {
     t1 = 0;
@@ -471,20 +527,32 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b4 || b1)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !right && !left && !b1)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (right)
   {
     cz++;
     if (cz == numchars)
+    {
       cz = 0;
+    }
     c = partyidx[cz] - 1;
     playeffect(0);
     first = 1;
@@ -493,16 +561,22 @@ drawloop:
   if (left)
   {
     if (!cz)
+    {
       cz = numchars - 1;
+    }
     else
+    {
       cz--;
+    }
     c = partyidx[cz] - 1;
     playeffect(0);
     first = 1;
   }
 
   while (!b4 && !b2 && !b1)
+  {
     goto drawloop;
+  }
   while (b4 || b2 || b1)
   {
     first = 2;
@@ -518,7 +592,9 @@ MainMenu()
   char c;
 
   if (!menuactive)
+  {
     return;
+  }
   playeffect(1);
   an = 1;
   whoisptr = 0;
@@ -531,33 +607,47 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       an = 0;
       timer_count = 0;
       return;
     }
+  }
   if (first && !b1 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     ptr++;
     if (ptr == 6)
+    {
       ptr = 0;
+    }
     playeffect(0);
     first = 1;
   }
   if (up)
   {
     if (!ptr)
+    {
       ptr = 5;
+    }
     else
+    {
       ptr--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -566,33 +656,41 @@ drawloop:
     switch (ptr)
     {
       case 0:
-        while (c = WhoIs(ptr))
+        while ((c = WhoIs(ptr)))
         {
           ItemMenu(c - 1);
           if (numchars == 1)
+          {
             break;
+          }
         }
         break;
       case 1:
-        while (c = WhoIs(ptr))
+        while ((c = WhoIs(ptr)))
         {
           EquipMenu(c - 1);
           if (numchars == 1)
+          {
             break;
+          }
         }
         break;
       case 2:
-        while (c = WhoIs(ptr))
+        while ((c = WhoIs(ptr)))
         {
           MagicMenu(c - 1);
           if (numchars == 1)
+          {
             break;
+          }
         }
         break;
       case 3:
         c = WhoIs(ptr);
         if (!c)
+        {
           break;
+        }
         StatusScreen(c);
         break;
       case 4:
@@ -610,7 +708,9 @@ drawloop:
   }
 
   if (!b4 && !b2)
+  {
     goto drawloop;
+  }
   if (b4)
   {
     first = 2;
@@ -639,25 +739,39 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2)
+    {
       goto drawloop;
+    }
     else
     {
       an = 0;
       return;
     }
+  }
   if (first && !b1 && !b2 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (right && mp_volume < 101)
+  {
     mp_volume++;
+  }
   if (left && mp_volume)
+  {
     mp_volume--;
+  }
 
   if (!b2)
+  {
     goto drawloop;
+  }
   if (b2)
   {
     first = 2;
@@ -674,15 +788,21 @@ SystemMenu()
   playeffect(1);
 drawloop:
   if (qabort)
+  {
     return;
+  }
   drawmap();
   tmenubox(20, 20, 150, 83);
   gotoxy(40, 27);
   if (!saveflag)
+  {
     fontcolor(17);
+  }
   printstring("Save Game");
   if (!saveflag)
+  {
     fontcolor(31);
+  }
   gotoxy(40, 37);
   printstring("Load Game");
   gotoxy(40, 47);
@@ -697,38 +817,52 @@ drawloop:
   readcontrols();
 
   if (first == 3)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
     {
       an = 0;
       timer_count = 0;
       return;
     }
+  }
   if (first == 2)
   {
     fin();
     first = 1;
   }
   if (first && !b1 && !b3 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     ptr++;
     if (ptr == 5)
+    {
       ptr = 0;
+    }
     playeffect(0);
     first = 1;
   }
   if (up)
   {
     if (!ptr)
+    {
       ptr = 4;
+    }
     else
+    {
       ptr--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -761,7 +895,9 @@ drawloop:
         qabort = 1;
         killvc = 1;
         while (b1)
+        {
           readcontrols();
+        }
         timer_count = 0;
         return;
     }
@@ -770,7 +906,9 @@ drawloop:
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 3;
@@ -835,7 +973,9 @@ PutCharBox(char a, char b, char c, char d, char e, char p)
     tcopysprite(baseaddr, 77, 16, 32, gsimg);
   }
   else
+  {
     tcopysprite(baseaddr, 77, 16, 32, chrs);
+  }
   if (numchars > 1)
   {
     if (!b)
@@ -844,7 +984,9 @@ PutCharBox(char a, char b, char c, char d, char e, char p)
       tcopysprite(baseaddr + 16, 77, 16, 32, gsimg);
     }
     else
+    {
       tcopysprite(baseaddr + 16, 77, 16, 32, chrs + 15360);
+    }
   }
   if (numchars > 2)
   {
@@ -854,7 +996,9 @@ PutCharBox(char a, char b, char c, char d, char e, char p)
       tcopysprite(baseaddr + 32, 77, 16, 32, gsimg);
     }
     else
+    {
       tcopysprite(baseaddr + 32, 77, 16, 32, chrs + 30720);
+    }
   }
   if (numchars > 3)
   {
@@ -864,7 +1008,9 @@ PutCharBox(char a, char b, char c, char d, char e, char p)
       tcopysprite(baseaddr + 48, 77, 16, 32, gsimg);
     }
     else
+    {
       tcopysprite(baseaddr + 48, 77, 16, 32, chrs + 46080);
+    }
   }
   if (numchars > 4)
   {
@@ -874,7 +1020,9 @@ PutCharBox(char a, char b, char c, char d, char e, char p)
       tcopysprite(baseaddr + 64, 77, 16, 32, gsimg);
     }
     else
+    {
       tcopysprite(baseaddr + 64, 77, 16, 32, chrs + 61440);
+    }
   }
   if (p)
   {
@@ -930,12 +1078,14 @@ PutItemBox(char l)
 
   tmenubox(118, 117, 330, 210);
   for (k = 0; k < 3; k++)
+  {
     for (j = 0; j < 6; j++)
     {
       a = pstats[l].inv[((k + 1) * 6) + j];
       img = itemicons + (items[a].icon * 256);
       tcopysprite(136 + (j * 32), 130 + (k * 24), 16, 16, img);
     }
+  }
 }
 
 void
@@ -966,20 +1116,32 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b3 && !right && !left)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (right)
   {
     p++;
     if (p == numchars)
+    {
       p = 0;
+    }
     playeffect(0);
     first = 1;
   }
@@ -987,18 +1149,26 @@ drawloop:
   if (left)
   {
     if (!p)
+    {
       p = numchars - 1;
+    }
     else
+    {
       p--;
+    }
     playeffect(0);
     first = 1;
   }
 
   if (b1)
+  {
     SellCharItem(p);
+  }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -1031,35 +1201,53 @@ drawloop:
     PutMessageBox(strbuf);
   }
   else
+  {
     PutMessageBox("");
+  }
   PutItemName(items[pstats[l].inv[ptr]].name);
   PutItemDesc(items[pstats[l].inv[ptr]].desc);
   PutEquipBox(partyidx[c] - 1);
   PutItemBox(partyidx[c] - 1);
   a = ptr / 6;
   if (ptr < 6)
+  {
     tcopysprite(132 + (ptr * 32), 86, 24, 24, itmptr);
+  }
   else
+  {
     tcopysprite(132 + ((ptr - (a * 6)) * 32), 102 + (a * 24), 24, 24, itmptr);
+  }
 
   vgadump();
 
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b3 && !right && !left && !up && !down)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     if (my < 3)
+    {
       my++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1067,7 +1255,9 @@ drawloop:
   if (up)
   {
     if (my)
+    {
       my--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1075,7 +1265,9 @@ drawloop:
   if (right)
   {
     if (mx < 5)
+    {
       mx++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1083,7 +1275,9 @@ drawloop:
   if (left)
   {
     if (mx)
+    {
       mx--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1092,14 +1286,20 @@ drawloop:
   if (b1)
   {
     if (items[pstats[l].inv[ptr]].price)
+    {
       ConfirmSell(c, ptr);
+    }
     else
+    {
       playeffect(12);
+    }
     first = 1;
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -1130,29 +1330,45 @@ drawloop:
   PutGPBox();
   PutCharBox(carray[0], carray[1], carray[2], carray[3], carray[4], c + 1);
   if (items[pstats[l].inv[ptr]].price)
+  {
     PutMessageBox("Are you sure?");
+  }
   PutItemName(items[pstats[l].inv[ptr]].name);
   PutItemDesc(items[pstats[l].inv[ptr]].desc);
   PutEquipBox(partyidx[c] - 1);
   PutItemBox(partyidx[c] - 1);
   a = ptr / 6;
   if (ptr < 6)
+  {
     tcopysprite(132 + (ptr * 32), 86, 24, 24, itmptr);
+  }
   else
+  {
     tcopysprite(132 + ((ptr - (a * 6)) * 32), 102 + (a * 24), 24, 24, itmptr);
+  }
   vgadump();
 
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b3 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down || up)
   {
@@ -1168,16 +1384,22 @@ drawloop:
       playeffect(13);
       gp += items[pstats[l].inv[ptr]].price / 2;
       if (ptr > 5)
+      {
         RemoveItem(l, ptr);
+      }
       else
+      {
         pstats[l].inv[ptr] = 0;
+      }
       UpdateEquipStats();
     }
     first = 2;
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -1193,11 +1415,13 @@ PutStoreInv()
 
   tmenubox(118, 80, 330, 140);
   for (k = 0; k < 2; k++)
+  {
     for (j = 0; j < 6; j++)
     {
       img = itemicons + (items[storeinv[(k * 6) + j]].icon * 256);
       tcopysprite(136 + (j * 32), 90 + (k * 24), 16, 16, img);
     }
+  }
 }
 
 void
@@ -1252,7 +1476,9 @@ drawloop:
     PutMessageBox(strbuf);
   }
   else
+  {
     PutMessageBox("");
+  }
   PutItemName(items[storeinv[ptr]].name);
   PutItemDesc(items[storeinv[ptr]].desc);
   PutStoreInv();
@@ -1263,22 +1489,32 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
     {
       bcs = 0;
       return;
     }
+  }
   if (first && !b1 && !b3 && !right && !left && !up && !down)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     if (my < 1)
+    {
       my++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1286,7 +1522,9 @@ drawloop:
   if (up)
   {
     if (my)
+    {
       my--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1294,7 +1532,9 @@ drawloop:
   if (right)
   {
     if (mx < 5)
+    {
       mx++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1302,7 +1542,9 @@ drawloop:
   if (left)
   {
     if (mx)
+    {
       mx--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1313,15 +1555,21 @@ drawloop:
     if (storeinv[ptr])
     {
       if (gp < items[storeinv[ptr]].price)
+      {
         playeffect(12);
+      }
       else
+      {
         BuyItem(ptr);
+      }
     }
     first = 1;
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -1374,9 +1622,13 @@ PutEquipPreview(char c, char ptr)
     printstring(">");
     dec_to_asciiz(atkp, strbuf);
     if (pstats[l].atk < atkp)
+    {
       fontcolor(97);
+    }
     if (atkp < pstats[l].atk)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen(strbuf) * 8), 124);
     printstring(strbuf);
     fontcolor(31);
@@ -1388,9 +1640,13 @@ PutEquipPreview(char c, char ptr)
     printstring(">");
     dec_to_asciiz(defp, strbuf);
     if (pstats[l].def < defp)
+    {
       fontcolor(97);
+    }
     if (defp < pstats[l].def)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen(strbuf) * 8), 133);
     printstring(strbuf);
     fontcolor(31);
@@ -1402,9 +1658,13 @@ PutEquipPreview(char c, char ptr)
     printstring(">");
     dec_to_asciiz(hitp, strbuf);
     if (pstats[l].hitc < hitp)
+    {
       fontcolor(97);
+    }
     if (hitp < pstats[l].hitc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen(strbuf) * 8), 142);
     printstring(strbuf);
     fontcolor(31);
@@ -1416,9 +1676,13 @@ PutEquipPreview(char c, char ptr)
     printstring(">");
     dec_to_asciiz(dodp, strbuf);
     if (pstats[l].dodc < dodp)
+    {
       fontcolor(97);
+    }
     if (dodp < pstats[l].dodc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen(strbuf) * 8), 151);
     printstring(strbuf);
     fontcolor(31);
@@ -1430,9 +1694,13 @@ PutEquipPreview(char c, char ptr)
     printstring(">");
     dec_to_asciiz(magp, strbuf);
     if (pstats[l].magc < magp)
+    {
       fontcolor(97);
+    }
     if (magp < pstats[l].magc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen(strbuf) * 8), 160);
     printstring(strbuf);
     fontcolor(31);
@@ -1444,9 +1712,13 @@ PutEquipPreview(char c, char ptr)
     printstring(">");
     dec_to_asciiz(mgrp, strbuf);
     if (pstats[l].mgrc < mgrp)
+    {
       fontcolor(97);
+    }
     if (mgrp < pstats[l].mgrc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen(strbuf) * 8), 169);
     printstring(strbuf);
     fontcolor(31);
@@ -1458,9 +1730,13 @@ PutEquipPreview(char c, char ptr)
     printstring(">");
     dec_to_asciiz(reap, strbuf);
     if (pstats[l].reac < reap)
+    {
       fontcolor(97);
+    }
     if (reap < pstats[l].reac)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen(strbuf) * 8), 178);
     printstring(strbuf);
     fontcolor(31);
@@ -1472,9 +1748,13 @@ PutEquipPreview(char c, char ptr)
     printstring(">");
     dec_to_asciiz(ferp, strbuf);
     if (pstats[l].ferc < ferp)
+    {
       fontcolor(97);
+    }
     if (ferp < pstats[l].ferc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen(strbuf) * 8), 187);
     printstring(strbuf);
     fontcolor(31);
@@ -1486,9 +1766,13 @@ PutEquipPreview(char c, char ptr)
     printstring(">");
     dec_to_asciiz(mblp, strbuf);
     if (pstats[l].mblc < mblp)
+    {
       fontcolor(97);
+    }
     if (mblp < pstats[l].mblc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen(strbuf) * 8), 196);
     printstring(strbuf);
     fontcolor(31);
@@ -1521,20 +1805,32 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b3 && !right && !left)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (right)
   {
     bcs++;
     if (bcs == numchars)
+    {
       bcs = 0;
+    }
     playeffect(0);
     first = 1;
   }
@@ -1542,9 +1838,13 @@ drawloop:
   if (left)
   {
     if (!bcs)
+    {
       bcs = numchars - 1;
+    }
     else
+    {
       bcs--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -1573,7 +1873,9 @@ drawloop:
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -1622,14 +1924,24 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b3 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down || up)
   {
@@ -1654,13 +1966,17 @@ drawloop:
       pstats[l].inv[items[storeinv[ptr]].equipflag - 1] = storeinv[ptr];
       pstats[l].inv[pstats[l].invcnt] = a;
       if (a)
+      {
         pstats[l].invcnt++;
+      }
       UpdateEquipStats();
     }
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -1691,12 +2007,14 @@ PutMagicBox(char l)
 
   tmenubox(118, 93, 330, 210);
   for (k = 0; k < 3; k++)
+  {
     for (j = 0; j < 6; j++)
     {
       a = pstats[l].maginv[((k)*6) + j];
       img = magicicons + (magic[a].icon * 256);
       tcopysprite(136 + (j * 32), 102 + (k * 24), 16, 16, img);
     }
+  }
 }
 
 void SellCharMagic(char c);
@@ -1728,20 +2046,32 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b3 && !right && !left)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (right)
   {
     p++;
     if (p == numchars)
+    {
       p = 0;
+    }
     playeffect(0);
     first = 1;
   }
@@ -1749,18 +2079,26 @@ drawloop:
   if (left)
   {
     if (!p)
+    {
       p = numchars - 1;
+    }
     else
+    {
       p--;
+    }
     playeffect(0);
     first = 1;
   }
 
   if (b1)
+  {
     SellCharMagic(p);
+  }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -1793,7 +2131,9 @@ drawloop:
     PutMessageBox(strbuf);
   }
   else
+  {
     PutMessageBox("");
+  }
   PutItemName(magic[pstats[l].maginv[ptr]].name);
   PutItemDesc(magic[pstats[l].maginv[ptr]].desc);
 
@@ -1802,28 +2142,44 @@ drawloop:
   PutMagicBox(partyidx[c] - 1);
   a = ptr / 6;
   if (ptr < 6)
+  {
     tcopysprite(132 + (ptr * 32), 98, 24, 24, itmptr);
+  }
   else
+  {
     tcopysprite(132 + ((ptr - (a * 6)) * 32), 102 + (a * 24), 24, 24, itmptr);
+  }
 
   vgadump();
 
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b3 && !right && !left && !up && !down)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     if (my < 3)
+    {
       my++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1831,7 +2187,9 @@ drawloop:
   if (up)
   {
     if (my)
+    {
       my--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1839,7 +2197,9 @@ drawloop:
   if (right)
   {
     if (mx < 5)
+    {
       mx++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1847,7 +2207,9 @@ drawloop:
   if (left)
   {
     if (mx)
+    {
       mx--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1856,14 +2218,20 @@ drawloop:
   if (b1)
   {
     if (magic[pstats[l].maginv[ptr]].cost)
+    {
       MConfirmSell(c, ptr);
+    }
     else
+    {
       playeffect(12);
+    }
     first = 1;
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -1877,7 +2245,9 @@ RemoveMagic(char c, char i)
   char j;
 
   for (j = i; j < pstats[c].magcnt; j++)
+  {
     pstats[c].maginv[j] = pstats[c].maginv[j + 1];
+  }
   pstats[c].magcnt--;
 }
 
@@ -1904,29 +2274,45 @@ drawloop:
   PutGPBox();
   PutCharBox(carray[0], carray[1], carray[2], carray[3], carray[4], c + 1);
   if (magic[pstats[l].maginv[ptr]].cost)
+  {
     PutMessageBox("Are you sure?");
+  }
   PutItemName(magic[pstats[l].maginv[ptr]].name);
   PutItemDesc(magic[pstats[l].maginv[ptr]].desc);
   //  PutEquipBox(partyidx[c]-1);
   PutMagicBox(partyidx[c] - 1);
   a = ptr / 6;
   if (ptr < 6)
+  {
     tcopysprite(132 + (ptr * 32), 98, 24, 24, itmptr);
+  }
   else
+  {
     tcopysprite(132 + ((ptr - (a * 6)) * 32), 102 + (a * 24), 24, 24, itmptr);
+  }
   vgadump();
 
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b3 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down || up)
   {
@@ -1947,7 +2333,9 @@ drawloop:
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -1963,11 +2351,13 @@ MPutStoreInv()
 
   tmenubox(118, 80, 330, 140);
   for (k = 0; k < 2; k++)
+  {
     for (j = 0; j < 6; j++)
     {
       img = magicicons + (magic[storeinv[(k * 6) + j]].icon * 256);
       tcopysprite(136 + (j * 32), 90 + (k * 24), 16, 16, img);
     }
+  }
 }
 
 void
@@ -2021,7 +2411,9 @@ drawloop:
     PutMessageBox(strbuf);
   }
   else
+  {
     PutMessageBox("");
+  }
   PutItemName(magic[storeinv[ptr]].name);
   PutItemDesc(magic[storeinv[ptr]].desc);
   MPutStoreInv();
@@ -2032,22 +2424,32 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
     {
       bcs = 0;
       return;
     }
+  }
   if (first && !b1 && !b3 && !right && !left && !up && !down)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     if (my < 1)
+    {
       my++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -2055,7 +2457,9 @@ drawloop:
   if (up)
   {
     if (my)
+    {
       my--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -2063,7 +2467,9 @@ drawloop:
   if (right)
   {
     if (mx < 5)
+    {
       mx++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -2071,7 +2477,9 @@ drawloop:
   if (left)
   {
     if (mx)
+    {
       mx--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -2082,15 +2490,21 @@ drawloop:
     if (storeinv[ptr])
     {
       if (gp < magic[storeinv[ptr]].cost)
+      {
         playeffect(12);
+      }
       else
+      {
         BuyMagic(ptr);
+      }
     }
     first = 1;
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -2125,20 +2539,32 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b3 && !right && !left)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (right)
   {
     bcs++;
     if (bcs == numchars)
+    {
       bcs = 0;
+    }
     playeffect(0);
     first = 1;
   }
@@ -2146,9 +2572,13 @@ drawloop:
   if (left)
   {
     if (!bcs)
+    {
       bcs = numchars - 1;
+    }
     else
+    {
       bcs--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -2163,7 +2593,9 @@ drawloop:
       while (i < 24)
       {
         if (storeinv[ptr] == pstats[l].maginv[i])
+        {
           alreadyhave = 1;
+        }
         i++;
       }
 
@@ -2186,7 +2618,9 @@ drawloop:
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;

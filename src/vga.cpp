@@ -22,7 +22,9 @@ int
 abs(int x)
 {
   if (x < 0)
+  {
     return -x;
+  }
   return x;
 }
 
@@ -39,7 +41,9 @@ set_palette(unsigned char *pall)
   unsigned int i;
 
   if (waitvrt)
+  {
     wait();
+  }
   // outportb(0x03c8, 0);
   // for (i=0; i<768; i++)
   //     outportb(0x03c9, pall[i]);
@@ -60,7 +64,9 @@ set_intensity(unsigned int n)
 {
   int i;
   for (i = 767; i >= 0; --i)
+  {
     pal2[i] = (pal[i] * n) >> 6;
+  }
   set_palette(pal2);
 }
 
@@ -108,7 +114,9 @@ void
 vgadump()
 {
   if (waitvrt)
+  {
     wait();
+  }
   //   asm("movl _virscr, %%esi              \n\t"
   //       "addl $5648, %%esi                \n\t"
   //       "movl _screen, %%edi              \n\t"
@@ -146,7 +154,9 @@ vline(int x, int y, int y2, char c)
   int i;
 
   for (i = 0; i < (y2 - y); i++)
+  {
     setpixel(x, (y + i), c);
+  }
 }
 
 void
@@ -376,7 +386,9 @@ fin()
   int i;
 
   if (!fade)
+  {
     return;
+  }
   if (cancelfade)
   {
     cancelfade--;
@@ -388,7 +400,9 @@ inloop:
   i = (timer_count * 64) / 30;
   set_intensity(i);
   if (timer_count < 30)
+  {
     goto inloop;
+  }
   set_intensity(63);
 }
 
@@ -398,7 +412,9 @@ fout()
   int i;
 
   if (!fade)
+  {
     return;
+  }
   if (cancelfade)
   {
     cancelfade--;
@@ -411,7 +427,9 @@ outloop:
   i = 64 - i;
   set_intensity(i);
   if (timer_count < 30)
+  {
     goto outloop;
+  }
   set_intensity(0);
 }
 
@@ -483,9 +501,13 @@ ColorScale(unsigned char *dest, int st, int fn, int inv)
     intensity += vergepal[(i * 3) + 2];
     intensity = intensity * (fn - st) / 192;
     if (inv)
+    {
       dest[i] = fn - intensity;
+    }
     else
+    {
       dest[i] = st + intensity;
+    }
   }
 }
 
@@ -562,6 +584,7 @@ Tcopysprite(int x1, int y1, int width, int height, unsigned char *src)
   unsigned char c, d;
 
   for (j = 0; j < height; j++)
+  {
     for (i = 0; i < width; i++)
     {
       jz = j + y1;
@@ -569,8 +592,11 @@ Tcopysprite(int x1, int y1, int width, int height, unsigned char *src)
       c = virscr[(jz * 352) + iz];
       d = src[(j * width) + i];
       if (d)
+      {
         virscr[(jz * 352) + iz] = transparencytbl[(d * 256) + c];
+      }
     }
+  }
 }
 
 void
@@ -580,6 +606,7 @@ _Tcopysprite(int x1, int y1, int width, int height, unsigned char *src)
   unsigned char c, d;
 
   for (j = 0; j < height; j++)
+  {
     for (i = 0; i < width; i++)
     {
       jz = j + y1;
@@ -587,8 +614,11 @@ _Tcopysprite(int x1, int y1, int width, int height, unsigned char *src)
       c = virscr[(jz * 352) + iz];
       d = src[(j * width) + i];
       if (d)
+      {
         virscr[(jz * 352) + iz] = transparencytbl[(c * 256) + d];
+      }
     }
+  }
 }
 
 // Font routines
@@ -602,15 +632,21 @@ LoadFont()
   fnt2 = (unsigned char *)valloc(14000, "fnt2");
   tbox = (unsigned char *)valloc(30000, "tbox");
   if (!(f = fopen("SMALL.FNT", "rb")))
+  {
     err("FATAL ERROR: Could not open SMALL.FNT.");
+  }
   fread(fnt, 63, 95, f);
   fclose(f);
   if (!(f = fopen("MAIN.FNT", "rb")))
+  {
     err("FATAL ERROR: Could not open MAIN.FNT.");
+  }
   fread(fnt2, 144, 95, f);
   fclose(f);
   if (!(f = fopen("BOX.RAW", "rb")))
+  {
     err("FATAL ERROR: Could not open BOX.RAW.");
+  }
   fread(tbox, 320, 66, f);
   fclose(f);
 }
@@ -621,12 +657,18 @@ pchar(int x, int y, char c)
   unsigned char *img;
 
   if ((c < 32) || (c > 126))
+  {
     return;
+  }
   img = fnt + ((c - 32) * 63);
   if ((c == 103) || (c == 106) || (c == 112) || (c == 113) || (c == 121))
+  {
     tcopysprite(x, y + 2, 7, 9, img);
+  }
   else
+  {
     tcopysprite(x, y, 7, 9, img);
+  }
 }
 
 void
@@ -635,12 +677,18 @@ VCpchar(int x, int y, char c)
   unsigned char *img;
 
   if ((c < 32) || (c > 126))
+  {
     return;
+  }
   img = fnt + ((c - 32) * 63);
   if ((c == 103) || (c == 106) || (c == 112) || (c == 113) || (c == 121))
+  {
     VCtcopysprite(x, y + 2, 7, 9, img);
+  }
   else
+  {
     VCtcopysprite(x, y, 7, 9, img);
+  }
 }
 
 void
@@ -649,12 +697,18 @@ bigpchar(int x, int y, char c)
   unsigned char *img;
 
   if ((c < 32) || (c > 126))
+  {
     return;
+  }
   img = fnt2 + ((c - 32) * 144);
   if ((c == 103) || (c == 106) || (c == 112) || (c == 113) || (c == 121))
+  {
     tcopysprite(x, y + 2, 9, 16, img);
+  }
   else
+  {
     tcopysprite(x, y, 9, 16, img);
+  }
 }
 
 void
@@ -672,7 +726,9 @@ printstring(char *str)
 
   i = 0;
   if (!str[0])
+  {
     return;
+  }
 
 mainloop:
   c = str[i];
@@ -680,7 +736,9 @@ mainloop:
   x1 = x1 + 8;
   i++;
   if (str[i] != 0)
+  {
     goto mainloop;
+  }
 }
 
 void
@@ -691,7 +749,9 @@ VCprintstring(int xx, int yy, char *str)
 
   i = 0;
   if (!str[0])
+  {
     return;
+  }
 
 mainloop:
   c = str[i];
@@ -699,7 +759,9 @@ mainloop:
   xx = xx + 8;
   i++;
   if (str[i] != 0)
+  {
     goto mainloop;
+  }
 }
 
 void
@@ -710,7 +772,9 @@ bigprintstring(char *str)
 
   i = 0;
   if (!str[0])
+  {
     return;
+  }
 
 mainloop:
   c = str[i];
@@ -718,7 +782,9 @@ mainloop:
   x1 = x1 + 10;
   i++;
   if (str[i] != 0)
+  {
     goto mainloop;
+  }
 }
 
 void
@@ -779,7 +845,9 @@ fontcolor(unsigned char c)
   for (i = 0; i < 5985; i++)
   {
     if (*ptr == oc)
+    {
       *ptr = c;
+    }
     ptr++;
   }
   oc = c;

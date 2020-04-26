@@ -67,11 +67,17 @@ int
 sgn(long a)
 {
   if (a > 0)
+  {
     return +1;
+  }
   else if (a < 0)
+  {
     return -1;
+  }
   else
+  {
     return 0;
+  }
 }
 
 void
@@ -168,13 +174,17 @@ Line3d(int x1, int y1, int z1, int x2, int y2, int z2, int color)
   }
 
   if (z1 == 0)
+  {
     z1++;
+  }
 
   x1new = x1 + 160 + (x1 / (z1 / 256));
   y1new = y1 + 100 + (y1 / (z1 / 256));
 
   if (z2 == 0)
+  {
     z2++;
+  }
 
   x2new = x2 + 160 + (x2 / (z2 * 256));
   y2new = y2 + 100 + (y2 / (z2 * 256));
@@ -238,7 +248,9 @@ GetMagic()
   while (i < 24)
   {
     if (d == pstats[c].maginv[i])
+    {
       alreadyhave = 1;
+    }
     i++;
   }
 
@@ -251,11 +263,14 @@ GetMagic()
       pstats[c].magcnt++;
     }
     else
+    {
       pstats[c].maginv[j - 1] = d;
+    }
   }
 }
 
-void VCSpellName() /* -- adapted from ric: ??/???/?? -- */
+void
+VCSpellName() /* -- adapted from ric: ??/???/?? -- */
 {
   int x1, y1, i, align;
 
@@ -266,7 +281,8 @@ void VCSpellName() /* -- adapted from ric: ??/???/?? -- */
   VCAString(x1, y1, magic[i].name, align);
 }
 
-void VCSpellDesc() /* -- adapted from ric: ??/???/?? --  */
+void
+VCSpellDesc() /* -- adapted from ric: ??/???/?? --  */
 {
   int x1, y1, i, align;
 
@@ -277,7 +293,8 @@ void VCSpellDesc() /* -- adapted from ric: ??/???/?? --  */
   VCAString(x1, y1, magic[i].desc, align);
 }
 
-void VCSpellImage() /* -- adapted from ric: ??/???/?? -- */
+void
+VCSpellImage() /* -- adapted from ric: ??/???/?? -- */
 {
   int x1, y1, i, gf;
   unsigned char gsimg[512];
@@ -308,7 +325,9 @@ MagicShop()
   nv = GrabC();
   memset(&storeinv, 0, 12);
   for (p = 0; p < nv; p++)
+  {
     storeinv[p] = ResolveOperand();
+  }
   p = 0;
 drawloop:
   drawmap();
@@ -320,18 +339,26 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
     {
       an = 0;
       timer_count = 0;
       return;
     }
+  }
   if (first && !b1 && !b3 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down || up)
   {
@@ -343,13 +370,19 @@ drawloop:
   if (b1)
   {
     if (!p)
+    {
       MBuyMenu();
+    }
     if (p)
+    {
       MSellMenu();
+    }
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;

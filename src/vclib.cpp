@@ -36,18 +36,26 @@ MapSwitch()
   ny = ResolveOperand();
   b = ResolveOperand();
   if ((nx) && (ny))
+  {
     usenxy = 1;
+  }
   else
+  {
     usenxy = 0;
+  }
   if (!b)
+  {
     fout();
+  }
 
   load_map(strbuf);
 
   drawmap();
   vgadump();
   if (!b)
+  {
     fin();
+  }
   killvc = 1;
   timer_count = 0;
 }
@@ -63,7 +71,9 @@ Warp()
   wy = ResolveOperand();
   b = ResolveOperand();
   if (!b)
+  {
     fout();
+  }
 
   for (i = 0; i < 5; i++)
   {
@@ -137,13 +147,18 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       i = 0;
       while (pstats[partyidx[i] - 1].invcnt == 24)
+      {
         i++;
+      }
       j = pstats[partyidx[i] - 1].invcnt;
       pstats[partyidx[i] - 1].inv[j] = c;
       pstats[partyidx[i] - 1].invcnt++;
@@ -151,13 +166,20 @@ drawloop:
       timer_count = 0;
       return;
     }
+  }
   if (first && !b1 && !b2 && !b4)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   while (!b4 && !b2 && !b1)
+  {
     goto drawloop;
+  }
   while (b4 || b2 || b1)
   {
     first = 2;
@@ -186,21 +208,31 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       an = 0;
       timer_count = 0;
       return;
     }
+  }
   if (first && !b1 && !b2 && !b4)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   while (!b4 && !b2 && !b1)
+  {
     goto drawloop;
+  }
   while (b4 || b2 || b1)
   {
     first = 2;
@@ -317,7 +349,9 @@ inloop:
   i = (timer_count * 64) / s;
   set_intensity(i);
   if (timer_count < s)
+  {
     goto inloop;
+  }
   set_intensity(63);
   timer_count = 0;
 }
@@ -334,7 +368,9 @@ outloop:
   i = 64 - i;
   set_intensity(i);
   if (timer_count < s)
+  {
     goto outloop;
+  }
   set_intensity(0);
   timer_count = 0;
 }
@@ -349,23 +385,31 @@ RemoveCharacter()
   c = ResolveOperand();
 
   for (i = 0; i < numchars; i++)
+  {
     if (c == partyidx[i])
     {
       foundit = 1;
       foundat = i;
     }
+  }
 
   if (!foundit)
+  {
     return;
+  }
 
   for (i = foundat; i < (numchars - 1); i++)
+  {
     partyidx[i] = partyidx[i + 1];
+  }
 
   partyidx[numchars] = 0;
   foundat = numchars - 1;
   numchars = 0;
   for (i = 0; i < foundat; i++)
+  {
     addcharacter(partyidx[i]);
+  }
   for (i = numchars; i < 5; i++)
   {
     party[i].cx = -1;
@@ -394,21 +438,31 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       an = 0;
       timer_count = 0;
       return;
     }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   while (!b4 && !b2 && !b1 && timer_count < duration)
+  {
     goto drawloop;
+  }
   while (b4 || b2 || b1)
   {
     first = 2;
@@ -453,7 +507,9 @@ drawloop:
   readcontrols();
 
   if (b1 || b2 || b4)
+  {
     goto drawloop;
+  }
   an = 0;
   timer_count = 0;
 }
@@ -472,7 +528,9 @@ DestroyItemProcessChar(unsigned char i, unsigned char c)
       if (l < 6)
       { /* -- ric:03/May/98 -- */
         if (equip[items[pstats[c].inv[l]].equipidx].ondeequip)
+        {
           ExecuteEffect(equip[items[pstats[c].inv[l]].equipidx].ondeequip - 1);
+        }
       }
       pstats[c].inv[l] = 0;
     }
@@ -481,24 +539,30 @@ DestroyItemProcessChar(unsigned char i, unsigned char c)
   }
 
   for (l = 0; l < pstats[c].invcnt; l++)
+  {
     if (pstats[c].inv[l] == i)
     {
       foundat = l;
       if (l < 6) /* -- ric:03/May/98 -- */
       {
         if (equip[items[pstats[c].inv[l]].equipidx].ondeequip)
+        {
           ExecuteEffect(equip[items[pstats[c].inv[l]].equipidx].ondeequip - 1);
+        }
         pstats[c].inv[l] = 0;
         UpdateEquipStats();
         return;
       }
       for (l = foundat; l < pstats[c].invcnt; l++)
+      {
         pstats[c].inv[l] = pstats[c].inv[l + 1];
+      }
       pstats[c].invcnt--;
       pstats[c].inv[pstats[c].invcnt] = 0;
       UpdateEquipStats();
       return;
     }
+  }
 }
 
 void
@@ -516,7 +580,9 @@ DestroyItem()
   }
 
   for (l = 1; l < 31; l++)
+  {
     DestroyItemProcessChar(i, l);
+  }
 }
 
 void
@@ -552,8 +618,11 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       an = 0;
@@ -561,10 +630,15 @@ drawloop:
       flags[flagidx] = selptr;
       return;
     }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (up || down)
   {
@@ -574,7 +648,9 @@ drawloop:
   }
 
   while (!b4 && !b2 && !b1)
+  {
     goto drawloop;
+  }
   while (b4 || b2 || b1)
   {
     first = 2;
@@ -592,12 +668,15 @@ ChainEvent()
   t = ResolveOperand();
 
   for (i = 0; i < varcnt; i++)
+  {
     varl[i] = ResolveOperand();
+  }
 
   code = mapvc + scriptofstbl[t];
 }
 
-void CallEvent() /* -- ric: 03/May/98 - Now saves temp vars across call -- */
+void
+CallEvent() /* -- ric: 03/May/98 - Now saves temp vars across call -- */
 {
   char varcnt, i, *buf, savetmpvar;
   unsigned short int t;
@@ -608,14 +687,20 @@ void CallEvent() /* -- ric: 03/May/98 - Now saves temp vars across call -- */
   t = ResolveOperand();
 
   for (i = 0; i < varcnt; i++)
+  {
     varl[i] = ResolveOperand();
+  }
 
   buf = code;
   if (savetmpvar)
+  {
     memcpy(savetvar, tvar, sizeof(tvar)); /* -- New -- */
+  }
   ExecuteScript(t);
   if (savetmpvar)
+  {
     memcpy(tvar, savetvar, sizeof(tvar)); /* -- New -- */
+  }
   code = buf;
 }
 
@@ -629,7 +714,9 @@ Heal()
 
   pstats[chr].curhp += amt;
   if (pstats[chr].curhp > pstats[chr].maxhp)
+  {
     pstats[chr].curhp = pstats[chr].maxhp;
+  }
 }
 
 void
@@ -651,20 +738,32 @@ EarthQuake()
     if (!switchflag)
     {
       if (k > xwin && k)
+      {
         nxw = 0;
+      }
       else if (k)
+      {
         nxw = xwin - (rand() % k);
+      }
       if (j > ywin && j)
+      {
         nyw = 0;
+      }
       else if (j)
+      {
         nyw = ywin - (rand() % j);
+      }
     }
     else
     {
       if (k)
+      {
         nxw = xwin + (rand() % k);
+      }
       if (j)
+      {
         nyw = ywin + (rand() % j);
+      }
     }
 
     switchflag = switchflag ^ 1;
@@ -704,7 +803,9 @@ ReviveChar()
   a = ResolveOperand();
   pstats[a].status = 0;
   if (!pstats[a].curhp)
+  {
     pstats[a].curhp = 1;
+  }
 }
 
 void
@@ -717,7 +818,9 @@ RestoreMP()
 
   pstats[chr].curmp += amt;
   if (pstats[chr].curmp > pstats[chr].maxmp)
+  {
     pstats[chr].curmp = pstats[chr].maxmp;
+  }
 }
 
 void
@@ -762,7 +865,9 @@ drawloop:
           line = 2;
         }
         else
+        {
           chr++;
+        }
         break;
       case 2:
         st2[chr] = str2[chr];
@@ -773,13 +878,17 @@ drawloop:
           line = 3;
         }
         else
+        {
           chr++;
+        }
         break;
       case 3:
         st3[chr] = str3[chr];
         st3[chr + 1] = 0;
         if (chr < strlen(str3))
+        {
           chr++;
+        }
         break;
     }
     timer_count--;
@@ -798,21 +907,31 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       an = 0;
       timer_count = 0;
       return;
     }
+  }
   if (first && !b1 && !b2 && !b4)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   while (!b4 && !b2 && !b1)
+  {
     goto drawloop;
+  }
   while (b4 || b2 || b1)
   {
     first = 2;
@@ -853,7 +972,9 @@ main_loop:
   vgadump();
 
   if (ct2 < delaytime)
+  {
     goto main_loop;
+  }
   timer_count = 0;
 }
 
@@ -912,7 +1033,9 @@ dloop:
   box(0, 232 - vd, 352, 232, 0);
   vgadump();
   if (timer_count <= duration)
+  {
     goto dloop;
+  }
   timer_count = 0;
   an = 0;
 }
@@ -938,7 +1061,9 @@ dloop:
   box(0, 232 - vd, 352, 232, 0);
   vgadump();
   if (timer_count <= duration)
+  {
     goto dloop;
+  }
   timer_count = 0;
   an = 0;
 }
@@ -985,7 +1110,9 @@ GetItem()
     pstats[c].invcnt++;
   }
   else
+  {
     pstats[c].inv[j - 1] = d;
+  }
 }
 
 void
@@ -999,7 +1126,9 @@ ForceEquip()
   b = items[i].equipflag - 1;
 
   if (pstats[c].inv[b])
+  {
     pstats[c].inv[b] = 0;
+  }
   pstats[c].inv[b] = i;
   UpdateEquipStats();
 }
@@ -1041,7 +1170,9 @@ Shop()
   nv = GrabC();
   memset(storeinv, 0, 12);
   for (p = 0; p < nv; p++)
+  {
     storeinv[p] = ResolveOperand();
+  }
   p = 0;
 drawloop:
   drawmap();
@@ -1053,18 +1184,26 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b2 || b3)
+    {
       goto drawloop;
+    }
     else
     {
       an = 0;
       timer_count = 0;
       return;
     }
+  }
   if (first && !b1 && !b3 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down || up)
   {
@@ -1076,13 +1215,19 @@ drawloop:
   if (b1)
   {
     if (!p)
+    {
       BuyMenu();
+    }
     if (p)
+    {
       SellMenu();
+    }
   }
 
   while (!b3 && !b2)
+  {
     goto drawloop;
+  }
   while (b3 || b2)
   {
     first = 2;
@@ -1124,8 +1269,12 @@ CharPos(char p1)
   char i;
 
   for (i = 0; i < numchars; i++)
+  {
     if (partyidx[i] == p1)
+    {
       return i;
+    }
+  }
 }
 
 void
@@ -1299,7 +1448,9 @@ VCClearRegion()
   y2 = ResolveOperand();
 
   for (i = y1; i <= y2; i++)
+  {
     VChline(x1, i, x2, 0);
+  }
 }
 
 void
@@ -1406,18 +1557,26 @@ Delay()
   s = ResolveOperand();
   timer_count = 0;
   while (timer_count < s)
+  {
     if ((keyboard_map[SCAN_ALT]) && (keyboard_map[SCAN_CTRL]) &&
         (keyboard_map[SCAN_DEL]))
+    {
       err("Exiting: CTRL-ALT-DEL pressed.");
+    }
+  }
 }
 
 void
 GetNextMove()
 {
   if (!party[0].scriptofs)
+  {
     return;
+  }
   if (!party[0].curcmd)
+  {
     GetNextCommand(0);
+  }
 
   switch (party[0].curcmd)
   {
@@ -1486,7 +1645,9 @@ GetNextMove()
         startfollow();
       }
       if (party[0].cx == party[0].cmdarg)
+      {
         party[0].cmdarg = 0;
+      }
       break;
       break;
     case 11:
@@ -1503,7 +1664,9 @@ GetNextMove()
         startfollow();
       }
       if (party[0].cy == party[0].cmdarg)
+      {
         party[0].cmdarg = 0;
+      }
       break;
       break;
     case 12:
@@ -1516,7 +1679,9 @@ GetNextMove()
       break;
   }
   if (!party[0].cmdarg)
+  {
     party[0].curcmd = 0;
+  }
 }
 
 void
@@ -1530,10 +1695,13 @@ moveparty()
   {
     GetNextMove();
     if (!party[0].scriptofs)
+    {
       return;
+    }
   }
 
   if (party[0].moving)
+  {
     for (i = 0; i < numchars; i++)
     {
       switch (party[i].moving)
@@ -1560,10 +1728,15 @@ moveparty()
           break;
       }
       if (party[i].framectr == 80)
+      {
         party[i].framectr = 0;
+      }
     }
+  }
   if (!party[0].movcnt)
+  {
     party[0].moving = 0;
+  }
 }
 
 void
@@ -1638,7 +1811,9 @@ main_loop:
   vgadump();
 
   if (party[0].scriptofs)
+  {
     goto main_loop;
+  }
 }
 
 void
@@ -2311,16 +2486,24 @@ WriteVar0(int var, int value)
       return;
     case 33:
       if (value < 0)
+      {
         value = 0;
+      }
       if (value > (xsize << 4) - 320)
+      {
         value = (xsize << 4) - 320;
+      }
       xwin = value;
       return;
     case 34:
       if (value < 0)
+      {
         value = 0;
+      }
       if (value > (ysize << 4) - 200)
+      {
         value = (ysize << 4) - 200;
+      }
       ywin = value;
       return;
     case 35:
@@ -2417,16 +2600,24 @@ WriteVar0(int var, int value)
       return;
     case 64:
       if (value < 0)
+      {
         value = 0;
+      }
       if (value > (xsize << 4) - 320)
+      {
         value = (xsize << 4) - 320;
+      }
       xwin1 = value;
       return;
     case 65:
       if (value < 0)
+      {
         value = 0;
+      }
       if (value > (ysize << 4) - 200)
+      {
         value = (ysize << 4) - 200;
+      }
       ywin1 = value;
       return;
     case 66:
@@ -2469,21 +2660,33 @@ ReadVar1(int var, int arg1)
       return flags[arg1];
     case 1:
       if (party[0].facing == arg1)
+      {
         return 1;
+      }
       else
+      {
         return 0;
+      }
     case 2:
       for (i = 0; i < numchars; i++)
+      {
         if (partyidx[i] == arg1)
+        {
           return i + 1;
+        }
+      }
       return 0;
     case 3:
       for (j = 0; j < numchars; j++)
       {
         l = partyidx[j] - 1;
         for (i = 0; i < pstats[l].invcnt; i++)
+        {
           if (pstats[l].inv[i] == arg1)
+          {
             return 1;
+          }
+        }
       }
       return 0;
     case 4:
@@ -2598,8 +2801,12 @@ ReadVar1(int var, int arg1)
       {
         l = partyidx[j] - 1;
         for (i = 0; i < pstats[l].magcnt; i++)
+        {
           if (pstats[l].maginv[i] == arg1)
+          {
             return 1;
+          }
+        }
       }
       return 0;
   }
@@ -2728,7 +2935,9 @@ ReadVar2(int var, int arg1, int arg2)
       {
         j = rand() % (arg2);
         if (j >= arg1)
+        {
           return j;
+        }
       }
     case 1:
       return (unsigned char)vcscreen[(arg2 * 320) + arg1];

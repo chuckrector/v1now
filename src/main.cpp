@@ -31,7 +31,9 @@ Exist(char *fname)
     return 1;
   }
   else
+  {
     return 0;
+  }
 }
 
 void
@@ -60,7 +62,9 @@ MiscSetup()
   InitRenderSystem();
   srand(time(NULL));
   if (Exist("STARTUP.SCR"))
+  {
     printf("Warning: startup.scr found, this file is no longer used \n");
+  }
 }
 
 void
@@ -92,7 +96,9 @@ InitPStats()
   char i;
   pdat = fopen("PARTY.DAT", "r");
   if (!pdat)
+  {
     err("Fatal error: PARTY.DAT not found");
+  }
   fscanf(pdat, "%s", strbuf);
   tchars = atoi((const char *)strbuf);
   for (i = 0; i < tchars; i++)
@@ -102,7 +108,9 @@ InitPStats()
     fscanf(pdat, "%s", strbuf);
     cdat = fopen((const char *)strbuf, "r");
     if (!cdat)
+    {
       err("Could not open character DAT file.");
+    }
     fscanf(cdat, "%s", &pstats[i].name);
     fgets((char *)strbuf, 99, cdat);
     fgets((char *)strbuf, 99, cdat);
@@ -211,7 +219,9 @@ LoadGame(char *fn)
   fread(&pstats, 1, sizeof pstats, f);
   fclose(f);
   for (i = 0; i < b; i++)
+  {
     addcharacter(partyidx[i]);
+  }
   nx = party[0].x / 16;
   ny = party[0].y / 16;
   usenxy = 1;
@@ -231,7 +241,9 @@ ProcessEquipDat()
 
   f = fopen("EQUIP.DAT", "r");
   if (!f)
+  {
     err("Could not open EQUIP.DAT.");
+  }
   fscanf(f, "%d", &a);
   for (i = 1; i <= a; i++)
   {
@@ -314,7 +326,9 @@ ProcessEquipDat()
     eqloop:
       fscanf(f, "%s", strbuf);
       if (!strcmp((char *)strbuf, "-"))
+      {
         continue;
+      }
       equip[i].equipable[atoi((const char *)strbuf) - 1] = 1;
       goto eqloop;
     }
@@ -323,7 +337,9 @@ ProcessEquipDat()
 
   f = fopen("MAGICEQ.DAT", "r");
   if (!f)
+  {
     err("Could not open MAGICEQ.DAT.");
+  }
   fscanf(f, "%d", &a);
   for (i = 1; i <= a; i++)
   {
@@ -341,7 +357,9 @@ ProcessEquipDat()
     meqloop:
       fscanf(f, "%s", strbuf);
       if (!strcmp((char *)strbuf, "-"))
+      {
         continue;
+      }
       mequip[i].equipable[atoi((const char *)strbuf) - 1] = 1;
       goto meqloop;
     }
@@ -350,7 +368,9 @@ ProcessEquipDat()
     mlevloop:
       fscanf(f, "%s", strbuf);
       if (!strcmp((char *)strbuf, "-"))
+      {
         continue;
+      }
       i2 = atoi((const char *)strbuf);
       mequip[i].level[i2 - 1] = 1;
       goto mlevloop;
@@ -367,14 +387,18 @@ InitItems()
   int j;
   f = fopen("ITEMICON.DAT", "rb");
   if (!f)
+  {
     err("Could not open ITEMICON.DAT.");
+  }
   fread(&b, 1, 1, f);
   fread(itemicons + 256, 256, b, f);
   fclose(f);
 
   f = fopen("ITEMS.DAT", "r");
   if (!f)
+  {
     err("Could not open ITEMS.DAT.");
+  }
   fscanf(f, "%s", strbuf);
   b = atoi((const char *)strbuf);
   for (i = 1; i < b + 1; i++)
@@ -404,14 +428,18 @@ InitItems()
 
   f = fopen("MAGICON.DAT", "rb");
   if (!f)
+  {
     err("Could not open MAGICON.DAT.");
+  }
   fread(&b, 1, 1, f);
   fread(magicicons + 256, 256, b, f);
   fclose(f);
 
   f = fopen("MAGIC.DAT", "r");
   if (!f)
+  {
     err("Could not open MAGIC.DAT.");
+  }
   fscanf(f, "%s", strbuf);
   b = atoi((const char *)strbuf);
   for (i = 1; i < b + 1; i++)
@@ -441,7 +469,9 @@ InitItems()
 
   f = fopen("MAGIC.VCS", "rb");
   if (!f)
+  {
     err("Could not open MAGIC.VCS");
+  }
   fread(&j, 1, 4, f);
   fread(&magicofstbl, 4, j, f);
   fread(magicvc, 1, 50000, f);
@@ -453,7 +483,9 @@ InitItems()
 
   f = fopen("MISCICON.DAT", "rb");
   if (!f)
+  {
     err("Could not open MISCICON.DAT.");
+  }
   fread(&b, 1, 1, f);
   fread(&menuptr, 1, 256, f);
   fread(&itmptr, 1, 576, f);
@@ -462,14 +494,18 @@ InitItems()
 
   f = fopen("SPEECH.SPC", "rb");
   if (!f)
+  {
     err("Could not open SPEECH.SPC");
+  }
   fread(&b, 1, 1, f);
   fread(speech, b, 1024, f);
   fclose(f);
 
   f = fopen("EFFECTS.VCS", "rb");
   if (!f)
+  {
     err("Could not open EFFECTS.VCS");
+  }
   fread(&j, 1, 4, f);
   fread(&effectofstbl, 4, j, f);
   fread(effectvc, 1, 50000, f);
@@ -477,7 +513,9 @@ InitItems()
 
   f = fopen("STARTUP.VCS", "rb");
   if (!f)
+  {
     err("Could not open STARTUP.VCS");
+  }
   fread(&j, 1, 4, f);
   fread(&startupofstbl, 4, j, f);
   fread(startupvc, 1, 50000, f);
@@ -500,15 +538,23 @@ drawloop:
   printstring("Exit to DOS");
 
   if (!cursel)
+  {
     tcopysprite(110, 102, 16, 16, menuptr);
+  }
   if (cursel == 1)
+  {
     tcopysprite(110, 112, 16, 16, menuptr);
+  }
   if (cursel == 2)
+  {
     tcopysprite(110, 122, 16, 16, menuptr);
+  }
 
   vgadump();
   while ((down) || (up))
+  {
     readcontrols();
+  }
 
 inputloop:
   readcontrols();
@@ -516,7 +562,9 @@ inputloop:
   {
     cursel++;
     if (cursel == 3)
+    {
       cursel = 0;
+    }
     playeffect(0);
     playeffect(0);
     goto drawloop;
@@ -524,20 +572,30 @@ inputloop:
   if (up)
   {
     if (!cursel)
+    {
       cursel = 2;
+    }
     else
+    {
       cursel--;
+    }
     playeffect(0);
     playeffect(0);
     goto drawloop;
   }
 
   if (!b1)
+  {
     goto inputloop;
+  }
   if (!cursel)
+  {
     StartNewGame("TEST.MAP");
+  }
   if (cursel == 1)
+  {
     LoadSaveErase(0);
+  }
   if (cursel == 2)
   {
     timer_count = 0;
@@ -547,7 +605,9 @@ inputloop:
     i = 64 - i;
     set_intensity(i);
     if (timer_count < s)
+    {
       goto fadeloop;
+    }
     set_intensity(0);
     err("");
   }

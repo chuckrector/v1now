@@ -51,7 +51,9 @@ InitRenderSystem()
     DrawLayer1 = DrawLayer1Speed;
   }
   else
+  {
     DrawLayer1 = DrawLayer1NoSpeed;
+  }
 }
 
 void
@@ -62,9 +64,13 @@ CalcVSPMask()
   for (i = 0; i < (numtiles * 256); i++)
   {
     if (vsp0[i])
+    {
       vspmask[i] = 0;
+    }
     else
+    {
       vspmask[i] = 255;
+    }
   }
 }
 
@@ -79,13 +85,21 @@ drawchar(int i, int xw, int yw)
   dy = party[i].y - yw;
 
   if (dx < 0 || dx > 336)
+  {
     return;
+  }
   if (dy < -16 || dy > 216)
+  {
     return;
+  }
   if (dy < 0)
+  {
     drawmode = 1;
+  }
   if (dy > 200)
+  {
     drawmode = 2;
+  }
 
   img = chrs + (party[i].chrindex * 15360);
 
@@ -107,21 +121,35 @@ drawchar(int i, int xw, int yw)
   if (party[i].moving && !party[i].specframe)
   {
     if ((party[i].framectr > 10) && (party[i].framectr < 21))
+    {
       fr += 1;
+    }
     if ((party[i].framectr > 20) && (party[i].framectr < 31))
+    {
       fr += 2;
+    }
     if ((party[i].framectr > 30) && (party[i].framectr < 41))
+    {
       fr += 1;
+    }
     if ((party[i].framectr > 50) && (party[i].framectr < 61))
+    {
       fr += 3;
+    }
     if ((party[i].framectr > 60) && (party[i].framectr < 71))
+    {
       fr += 4;
+    }
     if ((party[i].framectr > 70) && (party[i].framectr < 81))
+    {
       fr += 3;
+    }
   }
 
   if (party[i].specframe)
+  {
     fr = party[i].specframe;
+  }
   img += (fr * 512);
 
   switch (drawmode)
@@ -154,9 +182,15 @@ SortDrawOrder()
   int i, j;
 
   for (i = 1; i < numdraw; i++)
+  {
     for (j = numdraw - 1; j >= i; j--)
+    {
       if (party[draworder[j - 1]].y > party[draworder[j]].y)
+      {
         SwitchOrder(j, j - 1);
+      }
+    }
+  }
 }
 
 void
@@ -175,16 +209,28 @@ drawcharacters(int xw, int yw)
   memset(&draworder, 0, 100);
   numdraw = 0;
   if (drawparty)
+  {
     for (i = 0; i < numchars; i++)
+    {
       setdrawchar(i);
+    }
+  }
 
   if (drawentities)
+  {
     for (i = 5; i < entities; i++)
+    {
       setdrawchar(i);
+    }
+  }
 
   if (autoent && drawentities)
+  {
     for (i = 95; i < 95 + numchars; i++)
+    {
       setdrawchar(i);
+    }
+  }
 
   SortDrawOrder();
   drawchars(xw, yw);
@@ -196,7 +242,9 @@ drawchars(int xw, int yw)
   int i;
 
   for (i = 0; i < numdraw; i++)
+  {
     drawchar(draworder[i], xw, yw);
+  }
 }
 
 void
@@ -209,20 +257,32 @@ ProcessEarthQuake()
   if (!qswitch)
   {
     if (quakex > xwin && quakex)
+    {
       nx = 0;
+    }
     else if (quakex)
+    {
       nx = xwin - (rand() % quakex);
+    }
     if (quakey > ywin && quakey)
+    {
       ny = 0;
+    }
     else if (quakey)
+    {
       ny = ywin - (rand() % quakey);
+    }
   }
   else
   {
     if (quakex)
+    {
       nx = xwin + (rand() % quakex);
+    }
     if (quakey)
+    {
       ny = ywin + (rand() % quakey);
+    }
   }
 
   qswitch = qswitch ^ 1;
@@ -233,21 +293,33 @@ void
 drawvclayer()
 {
   if (layervctrans == 1)
+  {
     Tcopysprite(16, 16, 320, 200, vcscreen1);
+  }
   else if (layervctrans == 2)
+  {
     _Tcopysprite(16, 16, 320, 200, vcscreen1);
+  }
   else
+  {
     tcopysprite(16, 16, 320, 200, vcscreen1);
+  }
 }
 void
 drawvclayer2()
 {
   if (layervc2trans == 1)
+  {
     Tcopysprite(16, 16, 320, 200, vcscreen2);
+  }
   else if (layervc2trans == 2)
+  {
     _Tcopysprite(16, 16, 320, 200, vcscreen2);
+  }
   else
+  {
     tcopysprite(16, 16, 320, 200, vcscreen2);
+  }
 }
 
 void DrawLayer0(int xw, int yw);
@@ -257,17 +329,29 @@ drawmap()
   if (cameratracking)
   {
     if (party[0].x > 155)
+    {
       xwin = (party[0].x - 155);
+    }
     else
+    {
       xwin = 0;
+    }
     if (party[0].y > 95)
+    {
       ywin = (party[0].y - 95);
+    }
     else
+    {
       ywin = 0;
+    }
     if (xwin > ((xsize * 16) - 320))
+    {
       xwin = ((xsize * 16) - 320);
+    }
     if (ywin > ((ysize * 16) - 208))
+    {
       ywin = ((ysize * 16) - 208); /* -- ric: 28/Apr/98 -- */
+    }
   }
 
   if (quake)
@@ -276,52 +360,94 @@ drawmap()
     return;
   }
   if (hookretrace)
+  {
     ExecuteHookedScript(hookretrace);
+  }
   if (layer0)
+  {
     DrawLayer0(xwin, ywin);
+  }
   else
+  {
     memset(virscr + 5648, 0, 70368);
+  }
   if (layervc == 3)
+  {
     drawvclayer();
+  }
   if ((!layerc) || (layerc == 3))
+  {
     drawcharacters(xwin, ywin);
+  }
   if (layervc == 2)
+  {
     drawvclayer();
+  }
   if (layer1 && foregroundlock)
+  {
     DrawLayer1(xwin, ywin);
+  }
   else if (layer1)
+  {
     DrawLayer1(xwin1, ywin1);
+  }
   if ((layerc == 1) || (layerc == 2))
+  {
     drawcharacters(xwin, ywin);
+  }
   if (layervc == 1)
+  {
     drawvclayer();
+  }
   if (layervc2 == 1)
+  {
     drawvclayer2();
+  }
   if (screengradient)
+  {
     ColorField(16, 16, 336, 216, scrnxlatbl);
+  }
 }
 
 void
 drawmaploc(int xw, int yw)
 {
   if (hookretrace)
+  {
     ExecuteScript(hookretrace);
+  }
   if (layer0)
+  {
     DrawLayer0(xw, yw);
+  }
   else
+  {
     memset(virscr + 5648, 0, 70368);
+  }
   if ((!layerc) || (layerc == 3) && drawparty)
+  {
     drawcharacters(xw, yw);
+  }
   if (layer1)
+  {
     DrawLayer1(xw, yw);
+  }
   if ((layerc == 1) || (layerc == 2) && drawparty)
+  {
     drawcharacters(xw, yw);
+  }
   if (layervc)
+  {
     drawvclayer();
+  }
   if (layervc2)
+  {
     drawvclayer2();
+  }
   if (screengradient)
+  {
     ColorField(16, 16, 336, 216, scrnxlatbl);
+  }
 }
 
 void
@@ -348,6 +474,7 @@ DrawLayer0(int xw, int yw)
   yofs = (16 - (oyw & 15));
 
   for (i = 0; i < 14; i++)
+  {
     for (j = 0; j < 21; j++)
     {
       img = vsp0 +
@@ -355,6 +482,7 @@ DrawLayer0(int xw, int yw)
              << 8);
       copytile((j << 4) + xofs, (i << 4) + yofs, img);
     }
+  }
 }
 
 void
@@ -381,14 +509,18 @@ DrawLayer1Trans(int xw, int yw)
   yofs = (16 - (oyw & 15));
 
   for (i = 0; i < 14; i++)
+  {
     for (j = 0; j < 21; j++)
     {
       img = vsp0 +
             (tileidx[map1[(((ytc + i) % ysize) * xsize) + ((xtc + j) % xsize)]]
              << 8);
       if (img != vsp0)
+      {
         Tcopysprite((j << 4) + xofs, (i << 4) + yofs, 16, 16, img);
+      }
     }
+  }
 }
 
 void
@@ -415,14 +547,18 @@ _DrawLayer1Trans(int xw, int yw)
   yofs = (16 - (oyw & 15));
 
   for (i = 0; i < 14; i++)
+  {
     for (j = 0; j < 21; j++)
     {
       img = vsp0 +
             (tileidx[map1[(((ytc + i) % ysize) * xsize) + ((xtc + j) % xsize)]]
              << 8);
       if (img != vsp0)
+      {
         _Tcopysprite((j << 4) + xofs, (i << 4) + yofs, 16, 16, img);
+      }
     }
+  }
 }
 
 int
@@ -461,14 +597,18 @@ DrawLayer1NoSpeed(int xw, int yw)
   yofs = (16 - (oyw & 15));
 
   for (i = 0; i < 14; i++)
+  {
     for (j = 0; j < 21; j++)
     {
       img = vsp0 +
             (tileidx[map1[(((ytc + i) % ysize) * xsize) + ((xtc + j) % xsize)]]
              << 8);
       if (img != vsp0)
+      {
         tcopysprite((j << 4) + xofs, (i << 4) + yofs, 16, 16, img);
+      }
     }
+  }
   return (0);
 }
 
@@ -508,6 +648,7 @@ DrawLayer1Speed(int xw, int yw)
   yofs = (16 - (oyw & 15));
 
   for (i = 0; i < 14; i++)
+  {
     for (j = 0; j < 21; j++)
     {
       a =
@@ -515,8 +656,11 @@ DrawLayer1Speed(int xw, int yw)
            << 8);
       img = vsp0 + a;
       if (img != vsp0)
+      {
         tcopytile((j << 4) + xofs, (i << 4) + yofs, img, vspmask + a);
+      }
     }
+  }
   return (0);
 }
 
@@ -529,15 +673,23 @@ AnimateTile(char i, int l)
   {
     case 0:
       if (tileidx[l] < va0[i].finish)
+      {
         tileidx[l]++;
+      }
       else
+      {
         tileidx[l] = va0[i].start;
+      }
       break;
     case 1:
       if (tileidx[l] > va0[i].start)
+      {
         tileidx[l]--;
+      }
       else
+      {
         tileidx[l] = va0[i].finish;
+      }
       break;
     case 2:
       tileidx[l] = random(va0[i].start, va0[i].finish);
@@ -546,7 +698,9 @@ AnimateTile(char i, int l)
       if (flipped[l])
       {
         if (tileidx[l] != va0[i].start)
+        {
           tileidx[l]--;
+        }
         else
         {
           tileidx[l]++;
@@ -556,7 +710,9 @@ AnimateTile(char i, int l)
       else
       {
         if (tileidx[l] != va0[i].finish)
+        {
           tileidx[l]++;
+        }
         else
         {
           tileidx[l]--;
@@ -573,5 +729,7 @@ animate(char i)
 
   vadelay[i] = 0;
   for (l = va0[i].start; l <= va0[i].finish; l++)
+  {
     AnimateTile(i, l);
+  }
 }

@@ -6,7 +6,7 @@
 #include "keyboard.h"
 #include "pcx.h"
 
-keyb_map key_map[128]; // for recording bound keys
+struct keyb_map key_map[128]; // for recording bound keys
 
 char j; // use joystick or not
 
@@ -31,10 +31,16 @@ initcontrols(char joystk)
   int i;
   j = joystk;
   if (j)
+  {
     if (!calibrate())
+    {
       j = 0;
+    }
+  }
   for (i = 0; i < 128; i++)
+  {
     key_map[i].boundscript = 0; // no keys are bound yet
+  }
 }
 
 void err(char *errmsg);
@@ -43,7 +49,9 @@ void
 readb()
 {
   if (j)
+  {
     readbuttons();
+  }
   else
   {
     b1 = 0;
@@ -52,16 +60,26 @@ readb()
     b4 = 0;
   }
   if (keyboard_map[kb1])
+  {
     b1 = 1;
+  }
   if (keyboard_map[kb2])
+  {
     b2 = 1;
+  }
   if (keyboard_map[kb3])
+  {
     b3 = 1;
+  }
   if (keyboard_map[kb4])
+  {
     b4 = 1;
+  }
 
   if ((keyboard_map[SCAN_ALT]) && (keyboard_map[SCAN_X]))
+  {
     err("Exiting: ALT-X pressed.");
+  }
 
   if (keyboard_map[SCAN_F10])
   {
@@ -75,7 +93,9 @@ readcontrols()
 {
   int i;
   if (j)
+  {
     readjoystick();
+  }
   else
   {
     b1 = 0;
@@ -89,31 +109,51 @@ readcontrols()
   }
 
   if (keyboard_map[SCAN_UP])
+  {
     up = 1;
+  }
   if (keyboard_map[SCAN_DOWN])
+  {
     down = 1;
+  }
   if (keyboard_map[SCAN_LEFT])
+  {
     left = 1;
+  }
   if (keyboard_map[SCAN_RIGHT])
+  {
     right = 1;
+  }
   if (keyboard_map[kb1])
+  {
     b1 = 1;
+  }
   if (keyboard_map[kb2])
+  {
     b2 = 1;
+  }
   if (keyboard_map[kb3])
+  {
     b3 = 1;
+  }
   if (keyboard_map[kb4])
+  {
     b4 = 1;
+  }
 
   for (i = 0; i < 128; i++)
   { /* -- ric: 03/May/98 -- */
     key_map[i].pressed = 0;
     if (keyboard_map[i])
+    {
       key_map[i].pressed = 1; // no keys are bound yet
+    }
   }
 
   if ((keyboard_map[SCAN_ALT]) && (keyboard_map[SCAN_X]))
+  {
     err("Exiting: ALT-X pressed.");
+  }
 
   if (keyboard_map[SCAN_F10])
   {
@@ -138,21 +178,37 @@ readbuttons()
   btbl[3] = b & 8;
 
   if (btbl[jb1 - 1])
+  {
     b1 = 1;
+  }
   else
+  {
     b1 = 0;
+  }
   if (btbl[jb2 - 1])
+  {
     b2 = 1;
+  }
   else
+  {
     b2 = 0;
+  }
   if (btbl[jb3 - 1])
+  {
     b3 = 1;
+  }
   else
+  {
     b3 = 0;
+  }
   if (btbl[jb4 - 1])
+  {
     b4 = 1;
+  }
   else
+  {
     b4 = 0;
+  }
 }
 
 void
@@ -233,11 +289,19 @@ readjoystick()
   right = 0;
 
   if (jx < leftb)
+  {
     left = 1;
+  }
   if (jx > rightb)
+  {
     right = 1;
+  }
   if (jy < upb)
+  {
     up = 1;
+  }
   if (jy > downb)
+  {
     down = 1;
+  }
 }

@@ -60,6 +60,7 @@ grey(int width, int height, unsigned char *src, unsigned char *dest)
   unsigned char r, g, b, c, newc;
 
   for (j = 0; j < height; j++)
+  {
     for (i = 0; i < width; i++)
     {
       c = src[(j * width) + i];
@@ -68,12 +69,16 @@ grey(int width, int height, unsigned char *src, unsigned char *dest)
       b = pal[(c + (c << 1)) + 2];
       newc = (r + g + b) / 6;
       if (!newc && c)
+      {
         newc = 1;
+      }
       dest[(j * width) + i] = newc;
     }
+  }
 }
 
-void VCvline(int x, int y, int y2, char c) /* -- ric: 30/Apr/98 -- */
+void
+VCvline(int x, int y, int y2, char c) /* -- ric: 30/Apr/98 -- */
 {
   int i, j;
   i = y2 - y;
@@ -144,7 +149,8 @@ VCborder(int x1, int y1, int x2, int y2)
   VChline(x1 + 4, y2 - 3, x2 - 3, grey1);
 }
 
-void VCBox() /* -- ric: 21/Apr/98 -- */
+void
+VCBox() /* -- ric: 21/Apr/98 -- */
 {
   int i, x1, y1, x2, y2;
   x1 = ResolveOperand();
@@ -163,13 +169,18 @@ VCAString(int x1, int y1, char *strng, int align)
 /* -- ric: 30/Apr/98 -- */
 {
   if (align == 1)
+  {
     x1 -= (strlen(strng) << 2);
+  }
   if (align == 2)
+  {
     x1 -= (strlen(strng) << 3);
+  }
   VCprintstring(x1, y1, strng);
 }
 
-void VCCharName() /* -- ric: 21/Apr/98 -- */
+void
+VCCharName() /* -- ric: 21/Apr/98 -- */
 {
   int x1, y1, i, align;
 
@@ -180,7 +191,8 @@ void VCCharName() /* -- ric: 21/Apr/98 -- */
   VCAString(x1, y1, pstats[i].name, align);
 }
 
-void VCItemName() /* -- ric: 21/Apr/98 -- */
+void
+VCItemName() /* -- ric: 21/Apr/98 -- */
 {
   int x1, y1, i, align;
 
@@ -191,7 +203,8 @@ void VCItemName() /* -- ric: 21/Apr/98 -- */
   VCAString(x1, y1, items[i].name, align);
 }
 
-void VCItemDesc() /* -- ric: 21/Apr/98 -- */
+void
+VCItemDesc() /* -- ric: 21/Apr/98 -- */
 {
   int x1, y1, i, align;
 
@@ -202,7 +215,8 @@ void VCItemDesc() /* -- ric: 21/Apr/98 -- */
   VCAString(x1, y1, items[i].desc, align);
 }
 
-void VCItemImage() /* -- ric: 22/Apr/98 -- */
+void
+VCItemImage() /* -- ric: 22/Apr/98 -- */
 {
   int x1, y1, i, gf;
   unsigned char gsimg[512];
@@ -222,7 +236,8 @@ void VCItemImage() /* -- ric: 22/Apr/98 -- */
   VCtcopysprite(x1, y1, 16, 16, img);
 }
 
-void VCATextNum() /* -- ric: 24/Apr/98 -- */
+void
+VCATextNum() /* -- ric: 24/Apr/98 -- */
 {
   int x1, y1, i, align;
   char stringbuf[100];
@@ -235,7 +250,8 @@ void VCATextNum() /* -- ric: 24/Apr/98 -- */
   VCAString(x1, y1, stringbuf, align);
 }
 
-void VCSpc() /* -- ric: 24/Apr/98 -- */
+void
+VCSpc() /* -- ric: 24/Apr/98 -- */
 {
   int x1, y1, i, gf;
   unsigned char gsimg[1024];
@@ -255,7 +271,8 @@ void VCSpc() /* -- ric: 24/Apr/98 -- */
   VCtcopysprite(x1, y1, 32, 32, img);
 }
 
-void CallEffect() /* -- ric: 24/Apr/98 -- */
+void
+CallEffect() /* -- ric: 24/Apr/98 -- */
 {
   char varcnt, i;
   char *buf;
@@ -267,7 +284,9 @@ void CallEffect() /* -- ric: 24/Apr/98 -- */
   t = ResolveOperand();
 
   for (i = 0; i < varcnt; i++)
+  {
     varl[i] = ResolveOperand();
+  }
 
   buf = code;
   basebuf = basevc;
@@ -278,7 +297,8 @@ void CallEffect() /* -- ric: 24/Apr/98 -- */
   basevc = basebuf;
 }
 
-void ExecuteStartUpScript(unsigned short s) /* -- ric: 25/Apr/98 -- */
+void
+ExecuteStartUpScript(unsigned short s) /* -- ric: 25/Apr/98 -- */
 {
   basevc = startupvc;
   code = startupvc + startupofstbl[s];
@@ -286,7 +306,8 @@ void ExecuteStartUpScript(unsigned short s) /* -- ric: 25/Apr/98 -- */
   ExecuteBlock();
 }
 
-void CallScript() /* -- ric: 25/Apr/98 -- */
+void
+CallScript() /* -- ric: 25/Apr/98 -- */
 {
   char varcnt, i, *buf, *basebuf;
   unsigned short int t;
@@ -296,7 +317,9 @@ void CallScript() /* -- ric: 25/Apr/98 -- */
   t = ResolveOperand();
 
   for (i = 0; i < varcnt; i++)
+  {
     varl[i] = ResolveOperand();
+  }
 
   buf = code;
   basebuf = basevc;
@@ -309,7 +332,8 @@ void CallScript() /* -- ric: 25/Apr/98 -- */
   basevc = basebuf;
 }
 
-void BindKey() /* -- ric: 03/May/98 -- */
+void
+BindKey() /* -- ric: 03/May/98 -- */
 {
   int ky, scrpt;
   ky = ResolveOperand();
@@ -317,7 +341,8 @@ void BindKey() /* -- ric: 03/May/98 -- */
   key_map[ky].boundscript = scrpt;
 }
 
-void TextMenu() /* -- ric: 03/May/98 -- */
+void
+TextMenu() /* -- ric: 03/May/98 -- */
 {
   char *buf1, *buf2;
   char *opt;
@@ -332,7 +357,9 @@ void TextMenu() /* -- ric: 03/May/98 -- */
   flagidx = ResolveOperand();
   ptr = ResolveOperand();
   if (ptr)
+  {
     ptr--;
+  }
 
   nv = GrabC();
   buf1 = code;
@@ -341,7 +368,9 @@ void TextMenu() /* -- ric: 03/May/98 -- */
     opt = code;
     GrabString(strbuf);
     if (width < strlen(opt))
+    {
       width = strlen(opt);
+    }
   }
   buf2 = code;
 
@@ -361,8 +390,11 @@ drawloop:
   vgadump();
   readcontrols();
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       an = ansave;
@@ -370,25 +402,36 @@ drawloop:
       flags[flagidx] = 0;
       return;
     }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     ptr++;
     if (ptr == nv)
+    {
       ptr = 0;
+    }
     playeffect(0);
     first = 1;
   }
   if (up)
   {
     if (!ptr)
+    {
       ptr = nv - 1;
+    }
     else
+    {
       ptr--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -402,7 +445,9 @@ drawloop:
   }
 
   while (!b4 && !b2)
+  {
     goto drawloop;
+  }
   while (b4 || b2)
   {
     first = 2;
@@ -415,35 +460,40 @@ drawloop:
   return;
 }
 
-void itemMenu() /* -- ric: 03/May/98 -- */
+void
+itemMenu() /* -- ric: 03/May/98 -- */
 {
   int c;
   c = ResolveOperand();
   ItemMenu(c - 1);
 }
 
-void equipMenu() /* -- ric: 03/May/98 -- */
+void
+equipMenu() /* -- ric: 03/May/98 -- */
 {
   int c;
   c = ResolveOperand();
   EquipMenu(c - 1);
 }
 
-void magicMenu() /* -- ric: 03/May/98 -- */
+void
+magicMenu() /* -- ric: 03/May/98 -- */
 {
   int c;
   c = ResolveOperand();
   MagicMenu(c - 1);
 }
 
-void statusScreen() /* -- ric: 03/May/98 -- */
+void
+statusScreen() /* -- ric: 03/May/98 -- */
 {
   int c;
   c = ResolveOperand();
   StatusScreen(c);
 }
 
-void VCCr2() /* -- ric: 03/May/98 -- */
+void
+VCCr2() /* -- ric: 03/May/98 -- */
 {
   int x1, y1, i, gf;
   unsigned char gsimg[9216];
@@ -463,7 +513,8 @@ void VCCr2() /* -- ric: 03/May/98 -- */
   VCtcopysprite(x1, y1, 96, 96, img);
 }
 
-void VCTextBox() /* -- ric: 04/May/98 -- */
+void
+VCTextBox() /* -- ric: 04/May/98 -- */
 {
   char *buf1, *buf2;
   char *opt;
@@ -481,7 +532,9 @@ void VCTextBox() /* -- ric: 04/May/98 -- */
     opt = code;
     GrabString(strbuf);
     if (width < strlen(opt))
+    {
       width = strlen(opt);
+    }
   }
   buf2 = code;
   code = buf1;
@@ -501,10 +554,13 @@ void VCTextBox() /* -- ric: 04/May/98 -- */
     VCprintstring(x1 + 25, y1 + 7 + (p * 10), opt);
   }
   if (ptr)
+  {
     VCtcopysprite(7 + x1, 5 + y1 + ((ptr - 1) * 10), 16, 16, menuptr);
+  }
 }
 
-int ChooseChar(int x1, int y1) /* -- ric: 25/Apr/98 -- */
+int
+ChooseChar(int x1, int y1) /* -- ric: 25/Apr/98 -- */
 /* Returns roster order of selected character or zero if cancelled */
 {
   int first = 1, ptr = 0, j, ansave;
@@ -529,32 +585,46 @@ drawloop:
 
   readcontrols();
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       an = ansave;
       return 0;
     }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     ptr++;
     if (ptr == numchars)
+    {
       ptr = 0;
+    }
     playeffect(0);
     first = 1;
   }
   if (up)
   {
     if (!ptr)
+    {
       ptr = numchars - 1;
+    }
     else
+    {
       ptr--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -566,7 +636,9 @@ drawloop:
   }
 
   while (!b4 && !b2)
+  {
     goto drawloop;
+  }
   while (b4 || b2)
   {
     first = 2;

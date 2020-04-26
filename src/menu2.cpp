@@ -30,6 +30,7 @@ greyscale(int width, int height, unsigned char *src, unsigned char *dest)
   //          }
 
   for (j = 0; j < height; j++)
+  {
     for (i = 0; i < width; i++)
     {
       c = src[(j * width) + i];
@@ -39,6 +40,7 @@ greyscale(int width, int height, unsigned char *src, unsigned char *dest)
       c = (r + g + b) / 6;
       dest[(j * width) + i] = c;
     }
+  }
 }
 
 void
@@ -63,7 +65,9 @@ LoadSaveErase(char mode)
   fout();
 redraw:
   if (!(f = fopen(mnuname[mode], "r")))
+  {
     err("Fatal Error: Could not open specified MNU file.");
+  }
 parseloop:
   fscanf(f, "%s", strbuf);
 
@@ -150,24 +154,36 @@ parseloop:
       gotoxy(menus[i].posx + 162, menus[i].posy + 21);
       dec_to_asciiz(b, strbuf);
       if (b < 10)
+      {
         printstring("0");
+      }
       printstring(strbuf);
       printstring(":");
       fread(&b, 1, 1, f);
       dec_to_asciiz(b, strbuf);
       if (b < 10)
+      {
         printstring("0");
+      }
       printstring(strbuf);
       fread(&b, 1, 2, f);
       fread(&j, 1, 1, f);
       if (!i)
+      {
         img = buf1;
+      }
       if (i == 1)
+      {
         img = buf2;
+      }
       if (i == 2)
+      {
         img = buf3;
+      }
       if (i == 3)
+      {
         img = buf4;
+      }
       fread(img, 1, 2560, f);
       greyscale(80, 32, (unsigned char *)img, tbuf);
 
@@ -193,10 +209,16 @@ parseloop:
   }
   vgadump();
   if (!r)
+  {
     fin();
+  }
   if (r)
+  {
     while (b1)
+    {
       readcontrols();
+    }
+  }
 
 inputloop:
   readcontrols();
@@ -205,13 +227,21 @@ inputloop:
   {
     copysprite(menus[mpos].posx - 16, menus[mpos].posy + 10, 16, 16, rbuf);
     if (!mpos)
+    {
       img = buf1;
+    }
     if (mpos == 1)
+    {
       img = buf2;
+    }
     if (mpos == 2)
+    {
       img = buf3;
+    }
     if (mpos == 3)
+    {
       img = buf4;
+    }
     if (menus[mpos].linktype)
     {
       greyscale(80, 32, (unsigned char *)img, tbuf);
@@ -223,19 +253,29 @@ inputloop:
     }
     mpos++;
     if (mpos == 4)
+    {
       mpos = 0;
+    }
     grabregion(menus[mpos].posx - 16, menus[mpos].posy + 10, 16, 16, rbuf);
     tcopysprite(menus[mpos].posx - 16, menus[mpos].posy + 10, 16, 16, menuptr);
     if (menus[mpos].linktype)
     {
       if (!mpos)
+      {
         img = buf1;
+      }
       if (mpos == 1)
+      {
         img = buf2;
+      }
       if (mpos == 2)
+      {
         img = buf3;
+      }
       if (mpos == 3)
+      {
         img = buf4;
+      }
       tcopysprite(menus[mpos].posx, menus[mpos].posy, 16, 32, img);
       tcopysprite(menus[mpos].posx + 16, menus[mpos].posy, 16, 32, img + 512);
       tcopysprite(menus[mpos].posx + 32, menus[mpos].posy, 16, 32, img + 1024);
@@ -245,20 +285,30 @@ inputloop:
     playeffect(0);
     vgadump();
     while (down)
+    {
       readcontrols();
+    }
   }
 
   if (up)
   {
     copysprite(menus[mpos].posx - 16, menus[mpos].posy + 10, 16, 16, rbuf);
     if (!mpos)
+    {
       img = buf1;
+    }
     if (mpos == 1)
+    {
       img = buf2;
+    }
     if (mpos == 2)
+    {
       img = buf3;
+    }
     if (mpos == 3)
+    {
       img = buf4;
+    }
     if (menus[mpos].linktype)
     {
       greyscale(80, 32, (unsigned char *)img, tbuf);
@@ -269,21 +319,33 @@ inputloop:
       tcopysprite(menus[mpos].posx + 64, menus[mpos].posy, 16, 32, &tbuf[2048]);
     }
     if (!mpos)
+    {
       mpos = 3;
+    }
     else
+    {
       mpos--;
+    }
     grabregion(menus[mpos].posx - 16, menus[mpos].posy + 10, 16, 16, rbuf);
     tcopysprite(menus[mpos].posx - 16, menus[mpos].posy + 10, 16, 16, menuptr);
     if (menus[mpos].linktype)
     {
       if (!mpos)
+      {
         img = buf1;
+      }
       if (mpos == 1)
+      {
         img = buf2;
+      }
       if (mpos == 2)
+      {
         img = buf3;
+      }
       if (mpos == 3)
+      {
         img = buf4;
+      }
       tcopysprite(menus[mpos].posx, menus[mpos].posy, 16, 32, img);
       tcopysprite(menus[mpos].posx + 16, menus[mpos].posy, 16, 32, img + 512);
       tcopysprite(menus[mpos].posx + 32, menus[mpos].posy, 16, 32, img + 1024);
@@ -293,7 +355,9 @@ inputloop:
     playeffect(0);
     vgadump();
     while (up)
+    {
       readcontrols();
+    }
   }
 
   if ((b1) && (menus[mpos].linktype) && (!mode))
@@ -318,7 +382,9 @@ inputloop:
   }
 
   if (!b2)
+  {
     goto inputloop;
+  }
   fout();
   timer_count = 0;
 }
@@ -329,7 +395,9 @@ RemoveItem(char c, char i)
   char j;
 
   for (j = i; j < pstats[c].invcnt; j++)
+  {
     pstats[c].inv[j] = pstats[c].inv[j + 1];
+  }
   pstats[c].invcnt--;
 }
 
@@ -354,18 +422,24 @@ DrawItemMenu(char c, char ptr)
   tmenubox(120, 40, 330, 59); // Item name
   a = pstats[l].inv[ptr];
   if (!items[a].useflag || items[a].useflag >= 3)
+  {
     fontcolor(17);
+  }
   j = strlen((const char *)items[a].name);
   gotoxy(225 - (j * 4), 46);
   if (ptr < pstats[l].invcnt)
+  {
     printstring((char *)items[a].name);
+  }
   fontcolor(31);
 
   tmenubox(120, 61, 330, 80); // Item desc
   j = strlen((const char *)items[a].desc);
   gotoxy(225 - (j * 4), 67);
   if (ptr < pstats[l].invcnt)
+  {
     printstring((char *)items[a].desc);
+  }
 
   if (items[a].equipflag && !iuflag) // Show who it's equipable by
   {
@@ -396,17 +470,23 @@ DrawItemMenu(char c, char ptr)
 
   tmenubox(120, 117, 330, 210);
   for (k = 0; k < 3; k++)
+  {
     for (j = 0; j < 6; j++)
     {
       a = pstats[l].inv[((k + 1) * 6) + j];
       img = itemicons + (items[a].icon * 256);
       tcopysprite(137 + (j * 32), 130 + (k * 24), 16, 16, img);
     }
+  }
   a = ptr / 6;
   if (ptr < 6)
+  {
     tcopysprite(133 + (ptr * 32), 87, 24, 24, itmptr);
+  }
   else
+  {
     tcopysprite(133 + ((ptr - (a * 6)) * 32), 102 + (a * 24), 24, 24, itmptr);
+  }
 }
 
 void
@@ -434,32 +514,46 @@ drawloop:
 
   readcontrols();
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       UpdateEquipStats();
       return;
     }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     ptr++;
     if (ptr == numchars)
+    {
       ptr = 0;
+    }
     playeffect(0);
     first = 1;
   }
   if (up)
   {
     if (!ptr)
+    {
       ptr = numchars - 1;
+    }
     else
+    {
       ptr--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -469,9 +563,13 @@ drawloop:
     l = partyidx[c] - 1;
     t1 = pstats[l].inv[p];
     if (p < 6)
+    {
       pstats[l].inv[p] = 0;
+    }
     else
+    {
       RemoveItem(l, p);
+    }
 
     l = partyidx[ptr] - 1;
     j = pstats[l].invcnt;
@@ -482,7 +580,9 @@ drawloop:
   }
 
   while (!b4 && !b2)
+  {
     goto drawloop;
+  }
   while (b4 || b2)
   {
     first = 2;
@@ -501,7 +601,9 @@ ItemUse(char c, char p)
   t1 = pstats[a].inv[p];
 
   if (!items[t1].useflag || items[t1].useflag > 4)
+  {
     return;
+  }
   if (numchars == 1)
   {
     l = a;
@@ -531,29 +633,45 @@ drawloop:
 
   readcontrols();
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     ptr++;
     if (ptr == numchars)
+    {
       ptr = 0;
+    }
     playeffect(0);
     first = 1;
   }
   if (up)
   {
     if (!ptr)
+    {
       ptr = numchars - 1;
+    }
     else
+    {
       ptr--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -565,7 +683,9 @@ drawloop:
   }
 
   while (!b4 && !b2)
+  {
     goto drawloop;
+  }
   while (b4 || b2)
   {
     first = 2;
@@ -577,7 +697,9 @@ usesec:
   ExecuteEffect(items[t1].useeffect);
 
   if (items[t1].useflag == 2 || items[t1].useflag == 4)
+  {
     return;
+  }
 
   RemoveItem(c, p);
 }
@@ -606,33 +728,47 @@ drawloop:
 
   readcontrols();
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       iuflag = 0;
       UpdateEquipStats();
       return;
     }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     ptr++;
     if (ptr == 3)
+    {
       ptr = 0;
+    }
     playeffect(0);
     first = 1;
   }
   if (up)
   {
     if (!ptr)
+    {
       ptr = 2;
+    }
     else
+    {
       ptr--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -647,7 +783,9 @@ drawloop:
         break;
       case 1:
         if (numchars == 1)
+        {
           break;
+        }
         ItemGive(c, p);
         first = 2;
         break;
@@ -659,12 +797,16 @@ drawloop:
           break;
         }
         if (p > 5)
+        {
           RemoveItem(l, p);
+        }
         else
         {
           a = pstats[l].inv[p];
           if (equip[items[a].equipidx].ondeequip)
+          {
             ExecuteEffect(equip[items[a].equipidx].ondeequip - 1);
+          }
           pstats[l].inv[p] = 0;
         }
         UpdateEquipStats();
@@ -675,7 +817,9 @@ drawloop:
   }
 
   while (!b4 && !b2)
+  {
     goto drawloop;
+  }
   while (b4 || b2)
   {
     first = 2;
@@ -697,19 +841,31 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up && !right && !left)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     if (my < 3)
+    {
       my++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -717,7 +873,9 @@ drawloop:
   if (up)
   {
     if (my)
+    {
       my--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -725,7 +883,9 @@ drawloop:
   if (right)
   {
     if (mx < 5)
+    {
       mx++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -733,7 +893,9 @@ drawloop:
   if (left)
   {
     if (mx)
+    {
       mx--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -742,13 +904,17 @@ drawloop:
   if (b1)
   {
     if (ptr < pstats[l].invcnt)
+    {
       ItemActionSelect(c, ptr);
+    }
     first = 1;
     goto drawloop;
   }
 
   while (!b4 && !b2 && !b1)
+  {
     goto drawloop;
+  }
   while (b4 || b2)
   {
     first = 2;
@@ -818,18 +984,24 @@ DrawEquipMenu(char c, char ptr)
   tmenubox(120, 40, 330, 59); // Item name
   a = pstats[l].inv[ptr];
   if (!items[a].equipflag || !equip[items[a].equipidx].equipable[l])
+  {
     fontcolor(17);
+  }
   j = strlen((const char *)items[a].name);
   gotoxy(225 - (j * 4), 46);
   if (ptr < pstats[l].invcnt)
+  {
     printstring((char *)items[a].name);
+  }
   fontcolor(31);
 
   tmenubox(120, 61, 330, 80); // Item desc
   j = strlen((const char *)items[a].desc);
   gotoxy(225 - (j * 4), 67);
   if (ptr < pstats[l].invcnt)
+  {
     printstring((char *)items[a].desc);
+  }
 
   // If equipment, do effect preview box
 
@@ -844,9 +1016,13 @@ DrawEquipMenu(char c, char ptr)
     printstring((char *)">");
     dec_to_asciiz(atkp, strbuf);
     if (pstats[l].atk < atkp)
+    {
       fontcolor(97);
+    }
     if (atkp < pstats[l].atk)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen((const char *)strbuf) * 8), 124);
     printstring(strbuf);
     fontcolor(31);
@@ -858,9 +1034,13 @@ DrawEquipMenu(char c, char ptr)
     printstring((char *)">");
     dec_to_asciiz(defp, strbuf);
     if (pstats[l].def < defp)
+    {
       fontcolor(97);
+    }
     if (defp < pstats[l].def)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen((const char *)strbuf) * 8), 133);
     printstring(strbuf);
     fontcolor(31);
@@ -872,9 +1052,13 @@ DrawEquipMenu(char c, char ptr)
     printstring((char *)">");
     dec_to_asciiz(hitp, strbuf);
     if (pstats[l].hitc < hitp)
+    {
       fontcolor(97);
+    }
     if (hitp < pstats[l].hitc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen((const char *)strbuf) * 8), 142);
     printstring(strbuf);
     fontcolor(31);
@@ -886,9 +1070,13 @@ DrawEquipMenu(char c, char ptr)
     printstring((char *)">");
     dec_to_asciiz(dodp, strbuf);
     if (pstats[l].dodc < dodp)
+    {
       fontcolor(97);
+    }
     if (dodp < pstats[l].dodc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen((const char *)strbuf) * 8), 151);
     printstring(strbuf);
     fontcolor(31);
@@ -900,9 +1088,13 @@ DrawEquipMenu(char c, char ptr)
     printstring((char *)">");
     dec_to_asciiz(magp, strbuf);
     if (pstats[l].magc < magp)
+    {
       fontcolor(97);
+    }
     if (magp < pstats[l].magc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen((const char *)strbuf) * 8), 160);
     printstring(strbuf);
     fontcolor(31);
@@ -914,9 +1106,13 @@ DrawEquipMenu(char c, char ptr)
     printstring((char *)">");
     dec_to_asciiz(mgrp, strbuf);
     if (pstats[l].mgrc < mgrp)
+    {
       fontcolor(97);
+    }
     if (mgrp < pstats[l].mgrc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen((const char *)strbuf) * 8), 169);
     printstring(strbuf);
     fontcolor(31);
@@ -928,9 +1124,13 @@ DrawEquipMenu(char c, char ptr)
     printstring((char *)">");
     dec_to_asciiz(reap, strbuf);
     if (pstats[l].reac < reap)
+    {
       fontcolor(97);
+    }
     if (reap < pstats[l].reac)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen((const char *)strbuf) * 8), 178);
     printstring(strbuf);
     fontcolor(31);
@@ -942,9 +1142,13 @@ DrawEquipMenu(char c, char ptr)
     printstring((char *)">");
     dec_to_asciiz(ferp, strbuf);
     if (pstats[l].ferc < ferp)
+    {
       fontcolor(97);
+    }
     if (ferp < pstats[l].ferc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen((const char *)strbuf) * 8), 187);
     printstring(strbuf);
     fontcolor(31);
@@ -956,9 +1160,13 @@ DrawEquipMenu(char c, char ptr)
     printstring((char *)">");
     dec_to_asciiz(mblp, strbuf);
     if (pstats[l].mblc < mblp)
+    {
       fontcolor(97);
+    }
     if (mblp < pstats[l].mblc)
+    {
       fontcolor(36);
+    }
     gotoxy(110 - (strlen((const char *)strbuf) * 8), 196);
     printstring(strbuf);
     fontcolor(31);
@@ -975,6 +1183,7 @@ DrawEquipMenu(char c, char ptr)
 
   tmenubox(120, 117, 330, 210);
   for (k = 0; k < 3; k++)
+  {
     for (j = 0; j < 6; j++)
     {
       a = pstats[l].inv[((k + 1) * 6) + j];
@@ -986,11 +1195,16 @@ DrawEquipMenu(char c, char ptr)
       }
       tcopysprite(137 + (j * 32), 130 + (k * 24), 16, 16, img);
     }
+  }
   a = ptr / 6;
   if (ptr < 6)
+  {
     tcopysprite(133 + (ptr * 32), 87, 24, 24, itmptr);
+  }
   else
+  {
     tcopysprite(133 + ((ptr - (a * 6)) * 32), 102 + (a * 24), 24, 24, itmptr);
+  }
 }
 
 void
@@ -1012,12 +1226,16 @@ Equip(char c, char ptr)
     RemoveItem(l, ptr);
   }
   else
+  {
     pstats[l].inv[ptr] = pstats[l].inv[b - 1];
+  }
   pstats[l].inv[b - 1] = a;
   UpdateEquipStats();
   playeffect(15);
   if (equip[items[a].equipidx].onequip)
+  {
     ExecuteEffect(equip[items[a].equipidx].onequip - 1);
+  }
 }
 
 void
@@ -1040,7 +1258,9 @@ DeEquip(char c, char ptr)
   UpdateEquipStats();
   playeffect(14);
   if (equip[items[a].equipidx].ondeequip)
+  {
     ExecuteEffect(equip[items[a].equipidx].ondeequip - 1);
+  }
 }
 
 void
@@ -1060,19 +1280,31 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up && !right && !left)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     if (my < 3)
+    {
       my++;
+    }
     ptr = (my * 6) + mx;
     a = pstats[l].inv[ptr];
     CalcEquipPreview(l, items[a].equipidx, ptr);
@@ -1082,7 +1314,9 @@ drawloop:
   if (up)
   {
     if (my)
+    {
       my--;
+    }
     ptr = (my * 6) + mx;
     a = pstats[l].inv[ptr];
     CalcEquipPreview(l, items[a].equipidx, ptr);
@@ -1092,7 +1326,9 @@ drawloop:
   if (right)
   {
     if (mx < 5)
+    {
       mx++;
+    }
     ptr = (my * 6) + mx;
     a = pstats[l].inv[ptr];
     CalcEquipPreview(l, items[a].equipidx, ptr);
@@ -1102,7 +1338,9 @@ drawloop:
   if (left)
   {
     if (mx)
+    {
       mx--;
+    }
     ptr = (my * 6) + mx;
     a = pstats[l].inv[ptr];
     CalcEquipPreview(l, items[a].equipidx, ptr);
@@ -1118,9 +1356,13 @@ drawloop:
       goto drawloop;
     }
     if (ptr < 6)
+    {
       DeEquip(c, ptr);
+    }
     if (ptr >= 6)
+    {
       Equip(c, ptr);
+    }
     a = pstats[l].inv[ptr];
     CalcEquipPreview(l, items[a].equipidx, ptr);
     first = 1;
@@ -1128,7 +1370,9 @@ drawloop:
   }
 
   while (!b4 && !b2 && !b1)
+  {
     goto drawloop;
+  }
   while (b4 || b2)
   {
     first = 2;
@@ -1159,18 +1403,24 @@ DrawMagicMenu(char c, char ptr)
   tmenubox(120, 40, 330, 59); // Item name
   a = pstats[l].maginv[ptr];
   if (!magic[a].useflag || magic[a].useflag >= 3)
+  {
     fontcolor(17);
+  }
   j = strlen((const char *)magic[a].name);
   gotoxy(225 - (j * 4), 46);
   if (ptr < pstats[l].magcnt)
+  {
     printstring((char *)magic[a].name);
+  }
   fontcolor(31);
 
   tmenubox(120, 61, 330, 80); // Item desc
   j = strlen((const char *)magic[a].desc);
   gotoxy(225 - (j * 4), 67);
   if (ptr < pstats[l].magcnt)
+  {
     printstring((char *)magic[a].desc);
+  }
 
   if (magic[a].equipflag && !iuflag) // Show who it's equipable by
   {
@@ -1202,17 +1452,23 @@ DrawMagicMenu(char c, char ptr)
   }
 
   for (k = 0; k < 3; k++)
+  {
     for (j = 0; j < 6; j++)
     {
       a = pstats[l].maginv[((k + 1) * 6) + j];
       img = magicicons + (magic[a].icon * 256);
       tcopysprite(137 + (j * 32), 130 + (k * 24), 16, 16, img);
     }
+  }
   a = ptr / 6;
   if (ptr < 6)
+  {
     tcopysprite(133 + (ptr * 32), 98, 24, 24, itmptr);
+  }
   else
+  {
     tcopysprite(133 + ((ptr - (a * 6)) * 32), 102 + (a * 24), 24, 24, itmptr);
+  }
 }
 
 void
@@ -1227,7 +1483,9 @@ MagicUse(char c, char p)
   t1 = pstats[a].maginv[p];
 
   if (!magic[t1].useflag || magic[t1].useflag > 4)
+  {
     return;
+  }
   if (numchars == 1)
   {
     l = a;
@@ -1257,29 +1515,45 @@ drawloop:
 
   readcontrols();
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     ptr++;
     if (ptr == numchars)
+    {
       ptr = 0;
+    }
     playeffect(0);
     first = 1;
   }
   if (up)
   {
     if (!ptr)
+    {
       ptr = numchars - 1;
+    }
     else
+    {
       ptr--;
+    }
     playeffect(0);
     first = 1;
   }
@@ -1291,7 +1565,9 @@ drawloop:
   }
 
   while (!b4 && !b2)
+  {
     goto drawloop;
+  }
   while (b4 || b2)
   {
     first = 2;
@@ -1325,21 +1601,31 @@ usesec:
     readcontrols();
 
     if (first == 2)
+    {
       if (b1 || b2 || b4)
+      {
         goto drawloop2;
+      }
       else
       {
         an = 0;
         timer_count = 0;
         return;
       }
+    }
     if (first && !b1 && !b2 && !b4 && !down && !up)
+    {
       first = 0;
+    }
     else if (first)
+    {
       goto drawloop2;
+    }
 
     while (!b4 && !b2 && !b1)
+    {
       goto drawloop2;
+    }
     while (b4 || b2 || b1)
     {
       first = 2;
@@ -1350,7 +1636,9 @@ usesec:
   }
 
   if (magic[t1].useflag == 2 || magic[t1].useflag == 4)
+  {
     return;
+  }
 
   // RemoveItem(c,p);
 }
@@ -1385,18 +1673,26 @@ drawloop:
 
   readcontrols();
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
     {
       iuflag = 0;
       UpdateEquipStats();
       return;
     }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   /*
     if (down) { ptr++;
@@ -1421,7 +1717,9 @@ drawloop:
         break;
       case 1:
         if (numchars == 1)
+        {
           break;
+        }
         ItemGive(c, p);
         first = 2;
         break;
@@ -1433,12 +1731,16 @@ drawloop:
           break;
         }
         if (p > 5)
+        {
           RemoveItem(l, p);
+        }
         else
         {
           a = pstats[l].maginv[p];
           if (equip[magic[a].equipidx].ondeequip)
+          {
             ExecuteMagicEffect(equip[magic[a].equipidx].ondeequip - 1);
+          }
           pstats[l].maginv[p] = 0;
         }
         UpdateEquipStats();
@@ -1449,7 +1751,9 @@ drawloop:
   }
 
   while (!b4 && !b2)
+  {
     goto drawloop;
+  }
   while (b4 || b2)
   {
     first = 2;
@@ -1471,19 +1775,31 @@ drawloop:
   readcontrols();
 
   if (first == 2)
+  {
     if (b1 || b2 || b4)
+    {
       goto drawloop;
+    }
     else
+    {
       return;
+    }
+  }
   if (first && !b1 && !b2 && !b4 && !down && !up && !right && !left)
+  {
     first = 0;
+  }
   else if (first)
+  {
     goto drawloop;
+  }
 
   if (down)
   {
     if (my < 3)
+    {
       my++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1491,7 +1807,9 @@ drawloop:
   if (up)
   {
     if (my)
+    {
       my--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1499,7 +1817,9 @@ drawloop:
   if (right)
   {
     if (mx < 5)
+    {
       mx++;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1507,7 +1827,9 @@ drawloop:
   if (left)
   {
     if (mx)
+    {
       mx--;
+    }
     ptr = (my * 6) + mx;
     playeffect(0);
     first = 1;
@@ -1516,13 +1838,17 @@ drawloop:
   if (b1)
   {
     if (ptr < pstats[l].magcnt)
+    {
       MagicActionSelect(c, ptr);
+    }
     first = 1;
     goto drawloop;
   }
 
   while (!b4 && !b2 && !b1)
+  {
     goto drawloop;
+  }
   while (b4 || b2)
   {
     first = 2;

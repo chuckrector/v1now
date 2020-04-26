@@ -21,16 +21,22 @@ whotoattack()
   unsigned char t1, t2;
 
   if (numchars == 1)
+  {
     return partyidx[0] - 1;
+  }
 
 tryagain:
   t1 = rand();
   t2 = (255 / numchars) + 1;
   t1 = (t1 / t2);
   if (t1 == numchars)
+  {
     goto tryagain;
+  }
   if (pstats[partyidx[t1]].status == 1)
+  {
     goto tryagain;
+  }
 
   return partyidx[t1] - 1;
 }
@@ -43,9 +49,13 @@ random(int min, int max)
 rnd1:
   i = (rand() % (max + 1));
   if ((i >= min) && (i <= max))
+  {
     return i;
+  }
   else
+  {
     goto rnd1;
+  }
 }
 
 int
@@ -92,7 +102,9 @@ levelup(int chr)
 
   pstats[chr].lv++;
   for (i = 0; i < pstats[chr].lv; i++)
+  {
     fgets(strbuf, 99, d);
+  }
 
   fscanf(d, "%d", &pstats[chr].nxt);
   i = getnum();
@@ -128,7 +140,9 @@ levelup(int chr)
   while (i3 < 24)
   {
     if (i == pstats[chr].maginv[i3])
+    {
       alreadyhave = 1;
+    }
     i3++;
   }
 
@@ -155,7 +169,9 @@ levelup(int chr)
       pstats[chr].magcnt++;
     }
     else
+    {
       pstats[chr].maginv[j - 1] = i;
+    }
   }
 
   fclose(d);
@@ -171,7 +187,9 @@ battle()
   t1 = whotoattack();
 
   if (pstats[t1].curhp <= 2)
+  {
     pstats[t1].curhp = 0;
+  }
   else
   {
     pstats[t1].curhp -= 2;
@@ -180,7 +198,11 @@ battle()
 
   gp += 5;
   if (pstats[t1].curhp < 1)
+  {
     pstats[t1].status = 1;
+  }
   if (pstats[t1].nxt <= pstats[t1].exp)
+  {
     levelup(t1);
+  }
 }

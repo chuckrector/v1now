@@ -66,7 +66,9 @@ ParseSetup()
 parseloop:
   if ((keyboard_map[SCAN_ALT]) && (keyboard_map[SCAN_CTRL]) &&
       (keyboard_map[SCAN_DEL]))
+  {
     err("Exiting: CTRL-ALT-DEL pressed.");
+  }
 
   fscanf(s, "%s", strbuf);
   if (!strcmp(strbuf, "waitvrt"))
@@ -117,42 +119,42 @@ parseloop:
   }
   if (!strcmp(strbuf, "kb1"))
   {
-    fscanf(s, "%u", &kb1);
+    fscanf(s, "%s", &kb1);
     goto parseloop;
   }
   if (!strcmp(strbuf, "kb2"))
   {
-    fscanf(s, "%u", &kb2);
+    fscanf(s, "%s", &kb2);
     goto parseloop;
   }
   if (!strcmp(strbuf, "kb3"))
   {
-    fscanf(s, "%u", &kb3);
+    fscanf(s, "%s", &kb3);
     goto parseloop;
   }
   if (!strcmp(strbuf, "kb4"))
   {
-    fscanf(s, "%u", &kb4);
+    fscanf(s, "%s", &kb4);
     goto parseloop;
   }
   if (!strcmp(strbuf, "jb1"))
   {
-    fscanf(s, "%u", &jb1);
+    fscanf(s, "%s", &jb1);
     goto parseloop;
   }
   if (!strcmp(strbuf, "jb2"))
   {
-    fscanf(s, "%u", &jb2);
+    fscanf(s, "%s", &jb2);
     goto parseloop;
   }
   if (!strcmp(strbuf, "jb3"))
   {
-    fscanf(s, "%u", &jb3);
+    fscanf(s, "%s", &jb3);
     goto parseloop;
   }
   if (!strcmp(strbuf, "jb4"))
   {
-    fscanf(s, "%u", &jb4);
+    fscanf(s, "%s", &jb4);
     goto parseloop;
   }
 
@@ -258,10 +260,14 @@ sound_loadsfx(char *fname)
   char i;
 
   if (md_device == 3)
+  {
     return;
+  }
   numfx = 0;
   if (!(f = fopen(fname, "r")))
+  {
     err("Could not open sound effect index file.");
+  }
   fscanf(f, "%s", strbuf);
   numfx = atoi(strbuf);
 
@@ -289,13 +295,19 @@ void
 playsong(char *sngnme)
 {
   if (md_device == 3)
+  {
     return;
+  }
   if (!strcmp(sngnme, playingsong))
+  {
     return;
+  }
   memcpy(&playingsong, sngnme, 13);
 
   if (playing)
+  {
     stopsound();
+  }
   // if (!(mf=ML_LoadFN(sngnme))) err(myerr);
   // MP_Init(mf);
   // md_numchn=mf->numchn+2;
@@ -312,13 +324,17 @@ void
 stopsound()
 {
   if (md_device == 3)
+  {
     return;
+  }
 
   lastvol = mp_volume;
   mp_volume = 0;
   // if (MP_Ready()) return;
   if (!playing)
+  {
     return;
+  }
   // MD_PlayStop();
   sound_freesfx();
   // ML_Free(mf);
@@ -331,15 +347,23 @@ playeffect(char efc)
   char chanl;
 
   if (md_device == 3)
+  {
     return;
+  }
   if (!playing)
+  {
     return;
+  }
 
   chanl = md_numchn - curch;
   if (curch == 1)
+  {
     curch = 2;
+  }
   else
+  {
     curch = 1;
+  }
 
   // MD_VoiceSetVolume(chanl,64);
   // MD_VoiceSetPanning(chanl,128);

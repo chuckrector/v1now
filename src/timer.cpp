@@ -92,7 +92,9 @@ newhandler(void)
   timer++;
   //  if (playing) MD_Update();
   if (an)
+  {
     check_tileanimation();
+  }
   {
     tickctr++;
     if (tickctr == 100)
@@ -112,7 +114,9 @@ newhandler(void)
     }
   }
   if (hooktimer)
+  {
     ExecuteHookedScript(hooktimer);
+  }
   SendEOI(0);
 }
 

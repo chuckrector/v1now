@@ -41,7 +41,9 @@ ReadPCXLine(unsigned char *dest)
       run = c & 0x3f;
       c = fgetc(pcxf);
       for (j = 0; j < run; j++)
+      {
         dest[vidoffset + n + j] = c;
+      }
       n += run;
     }
     else
@@ -56,7 +58,9 @@ void
 LoadPCXHeader(char *fname)
 {
   if (!(pcxf = fopen(fname, "rb")))
+  {
     err("Could not open specified PCX file.");
+  }
   fread(&manufacturer, 1, 1, pcxf);
   fread(&version, 1, 1, pcxf);
   fread(&encoding, 1, 1, pcxf);
@@ -81,14 +85,18 @@ LoadPCXHeader(char *fname)
   bytes = bytes_per_line;
 
   for (i = 0; i < 768; i++)
+  {
     pal[i] = pal[i] >> 2;
+  }
 }
 
 void
 LoadPCXHeaderNP(char *fname)
 {
   if (!(pcxf = fopen(fname, "rb")))
+  {
     err("Could not open specified PCX file.");
+  }
   fread(&manufacturer, 1, 1, pcxf);
   fread(&version, 1, 1, pcxf);
   fread(&encoding, 1, 1, pcxf);
@@ -156,14 +164,18 @@ WritePalette()
   int i;
 
   for (i = 0; i < 768; i++)
+  {
     pal[i] = pal[i] << 2;
+  }
 
   b = 12;
   fwrite(&b, 1, 1, pcxf);
   fwrite(pal, 1, 768, pcxf);
 
   for (i = 0; i < 768; i++)
+  {
     pal[i] = pal[i] >> 2;
+  }
 }
 
 void
@@ -225,7 +237,9 @@ ScreenShot()
   fwrite(virscr, 1, 59, pcxf); // filler
 
   for (w1 = 0; w1 < 200; w1++)
+  {
     WritePCXLine(screen + (w1 * 320));
+  }
 
   WritePalette();
   fclose(pcxf);
