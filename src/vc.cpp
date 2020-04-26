@@ -82,7 +82,7 @@ GrabW()
   return c;
 }
 
-unsigned int
+unsigned long
 GrabD()
 {
   unsigned int c;
@@ -282,6 +282,7 @@ ProcessOperand()
     case OP_GROUP:
       return ResolveOperand();
   }
+  return 0;
 }
 
 void
@@ -482,7 +483,8 @@ void
 ProcessSwitch()
 {
   int realvalue, compvalue;
-  unsigned char c, *next;
+  unsigned char c;
+  unsigned char *next;
 
   realvalue = ResolveOperand();
   c = GrabC();

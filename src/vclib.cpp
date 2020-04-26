@@ -1275,6 +1275,7 @@ CharPos(char p1)
       return i;
     }
   }
+  return 0;
 }
 
 void
@@ -2381,6 +2382,7 @@ ReadVar0(int var)
     case 73:
       return 0; // mp_sngpos; /* -- xBig_D: 10/May/98 */
   }
+  return 0;
 }
 
 void
@@ -2810,6 +2812,7 @@ ReadVar1(int var, int arg1)
       }
       return 0;
   }
+  return 0;
 }
 
 void
@@ -2959,6 +2962,7 @@ ReadVar2(int var, int arg1, int arg2)
     case 6:
       return pstats[arg1].maginv[arg2];
   }
+  return 0;
 }
 
 void

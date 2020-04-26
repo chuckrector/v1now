@@ -103,7 +103,7 @@ InitPStats()
   tchars = atoi((const char *)strbuf);
   for (i = 0; i < tchars; i++)
   {
-    fscanf(pdat, "%s", &pstats[i].chrfile);
+    fscanf(pdat, "%s", pstats[i].chrfile);
     fscanf(pdat, "%s", strbuf);
     fscanf(pdat, "%s", strbuf);
     cdat = fopen((const char *)strbuf, "r");
@@ -111,7 +111,7 @@ InitPStats()
     {
       err("Could not open character DAT file.");
     }
-    fscanf(cdat, "%s", &pstats[i].name);
+    fscanf(cdat, "%s", pstats[i].name);
     fgets((char *)strbuf, 99, cdat);
     fgets((char *)strbuf, 99, cdat);
     fscanf(cdat, "%s", strbuf);

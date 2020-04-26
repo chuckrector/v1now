@@ -255,7 +255,7 @@ sound_init()
 }
 
 void
-sound_loadsfx(char *fname)
+sound_loadsfx(const char *fname)
 {
   FILE *f;
   char i;

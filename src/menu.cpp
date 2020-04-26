@@ -226,6 +226,8 @@ drawloop:
     first = 2;
     goto drawloop;
   }
+
+  return 0;
 }
 
 void
@@ -351,7 +353,7 @@ drawloop:
       mp = partyidx[cnt2];
       partyidx[cnt1] = mp;
       partyidx[cnt2] = t1;
-      mp = cnt2;
+      // mp = cnt2;
       t1 = numchars;
 
       numchars = 0; // Here we reload CHRs
@@ -1032,7 +1034,7 @@ PutCharBox(char a, char b, char c, char d, char e, char p)
 }
 
 void
-PutMessageBox(char *str)
+PutMessageBox(const char *str)
 {
   tmenubox(118, 20, 330, 38);
   gotoxy(224 - (strlen(str) * 4), 26);
@@ -1040,7 +1042,7 @@ PutMessageBox(char *str)
 }
 
 void
-PutItemName(char *str)
+PutItemName(const char *str)
 {
   tmenubox(118, 40, 330, 58);
   gotoxy(224 - (strlen(str) * 4), 46);
@@ -1048,7 +1050,7 @@ PutItemName(char *str)
 }
 
 void
-PutItemDesc(char *str)
+PutItemDesc(const char *str)
 {
   tmenubox(118, 60, 330, 78);
   gotoxy(224 - (strlen(str) * 4), 66);

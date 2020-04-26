@@ -516,6 +516,7 @@ InvFace()
     case 3:
       return 2;
   }
+  return 0;
 }
 
 void
