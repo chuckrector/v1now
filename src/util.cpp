@@ -1,3 +1,5 @@
+#include "util.h"
+
 void strupr(char* s)
 {
     while (*s) {

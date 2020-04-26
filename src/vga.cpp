@@ -3,10 +3,6 @@
 
 unsigned char oc = 31;
 
-int abs(int x) {
-  if (x<0) return -x;
-  return x;
-}
 unsigned char pal[768];
 unsigned char pal2[768];
 
@@ -21,6 +17,11 @@ unsigned char *virscr;
 char waitvrt;
 char fade = 1;
 char cancelfade = 0;
+
+int abs(int x) {
+  if (x<0) return -x;
+  return x;
+}
 
 void wait()
 {

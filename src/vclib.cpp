@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h> // rand
+#include <stdlib.h>
 
 #include "vclib.h"
 

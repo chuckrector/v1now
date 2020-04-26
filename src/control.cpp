@@ -2,10 +2,11 @@
 // Handles keyboard/joystick interfaces into a unified system.
 // Copyright (C)1997 BJ Eirich
 
+#include "control.h"
 #include "keyboard.h"
 #include "pcx.h"
 
-struct keyb_map key_map[128];         // for recording bound keys
+keyb_map key_map[128];         // for recording bound keys
 
 char j;                               // use joystick or not
 

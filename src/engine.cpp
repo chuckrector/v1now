@@ -1,7 +1,3 @@
-// engine.c
-// All core engine code
-// Copyright (C)1997 BJ Eirich
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +11,6 @@
 #include "sound.h"
 #include "vc.h"
 #include "vga.h"
-
 
 int vspm;
 char moneycheat=0;

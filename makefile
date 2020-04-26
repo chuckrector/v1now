@@ -1,6 +1,6 @@
 CC=g++
 
 build/%.o: src/%.cpp
-	$(CC) -c -o3 -o $@ -w $<
+	$(CC) -c -fmax-errors=5 -o3 -o $@ -w $<
 
 build/main: $(patsubst src/%.cpp,build/%.o,$(wildcard src/*.cpp))

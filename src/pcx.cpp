@@ -1,11 +1,11 @@
-// pcx.c
-// PCX read/write routines
-// A bit more flexible this time around, for variant destinations, image sizes,
-// etc.
+#include <string.h>
 
 #include "pcx.h"
 
-char manufacturer;                     // pcx header
+#include "main.h"
+#include "vga.h"
+
+char manufacturer;
 char version;
 char encoding;
 char bits_per_pixel;

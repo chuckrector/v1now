@@ -2,10 +2,6 @@
 #define PCX_H
 
 #include <stdio.h>
-#include <string.h>
-#include "timer.h"
-#include "vga.h"
-#include "main.h"
 
 extern unsigned short int width;
 extern unsigned short int depth;
